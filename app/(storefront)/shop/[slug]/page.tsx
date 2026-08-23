@@ -77,7 +77,13 @@ export default async function ProductPage({
           </h1>
 
           <div className="mt-6">
-            <VariantPicker variants={product.variants} />
+            <VariantPicker
+              productId={product.id}
+              productSlug={product.slug}
+              productName={product.name}
+              imageUrl={product.imageUrl}
+              variants={product.variants}
+            />
           </div>
 
           {whatsappLink ? (

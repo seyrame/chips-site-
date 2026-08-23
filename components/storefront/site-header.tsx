@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CartBadge } from "@/components/cart/cart-badge";
 import { BRAND } from "@/lib/config/site";
 
 export function SiteHeader() {
@@ -28,12 +29,7 @@ export function SiteHeader() {
           >
             Our Story
           </Link>
-          <Link
-            href="/shop"
-            className="ml-2 rounded-full bg-forest px-5 py-2.5 font-semibold text-cream transition-colors hover:bg-forest-soft"
-          >
-            Order Now
-          </Link>
+          <CartBadge />
         </nav>
       </div>
     </header>

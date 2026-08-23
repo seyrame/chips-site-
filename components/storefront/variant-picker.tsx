@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
+import { useCart } from "@/components/cart/cart-provider";
+import type { CartItem } from "@/types";
 import { formatMoney } from "@/utils/money";
 
 interface PickerVariant {
@@ -12,13 +15,49 @@ interface PickerVariant {
   lowStockThreshold: number;
 }
 
-export function VariantPicker({ variants }: { variants: PickerVariant[] }) {
-  const firstAvailable = variants.find((v) => v.stockQuantity > 0) ?? variants[0];
+export function VariantPicker({
+  productId,
+  productSlug,
+  productName,
+  imageUrl,
+  variants,
+}: {
+  productId: string;
+  productSlug: string;
+  productName: string;
+  imageUrl: string | null;
+  variants: PickerVariant[];
+}) {
+  const { addItem } = useCart();
+  const firstAvailable =
+    variants.find((v) => v.stockQuantity > 0) ?? variants[0];
   const [selectedId, setSelectedId] = useState<string | undefined>(
     firstAvailable?.id
   );
+  const [quantity, setQuantity] = useState(1);
+  const [justAdded, setJustAdded] = useState(false);
 
   const selected = variants.find((v) => v.id === selectedId);
+  const maxQty = Math.min(selected?.stockQuantity ?? 1, 99);
+  const anyStock = variants.some((v) => v.stockQuantity > 0);
+
+  function handleAdd() {
+    if (!selected || selected.stockQuantity === 0) return;
+
+    const line: Omit<CartItem, "quantity"> = {
+      variantId: selected.id,
+      productId,
+      productSlug,
+      productName,
+      variantName: selected.name,
+      imageUrl,
+      unitPrice: selected.price,
+      maxQuantity: selected.stockQuantity,
+    };
+    addItem(line, quantity);
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 2000);
+  }
 
   return (
     <div>
@@ -36,7 +75,10 @@ export function VariantPicker({ variants }: { variants: PickerVariant[] }) {
                 type="button"
                 disabled={soldOut}
                 aria-pressed={isSelected}
-                onClick={() => setSelectedId(variant.id)}
+                onClick={() => {
+                  setSelectedId(variant.id);
+                  setQuantity(1);
+                }}
                 className={`rounded-2xl border px-5 py-3 text-sm transition-colors ${
                   isSelected
                     ? "border-forest bg-forest text-cream"
@@ -71,10 +113,61 @@ export function VariantPicker({ variants }: { variants: PickerVariant[] }) {
         </div>
       ) : null}
 
-      <p className="mt-6 rounded-2xl bg-cream-dark px-5 py-4 text-sm text-charcoal/70">
-        Online checkout launches with our next release. To order today, message
-        us on WhatsApp using the link below.
-      </p>
+      {/* Quantity + add to cart */}
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div className="flex h-12 items-center rounded-full border border-forest/20 bg-white">
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            disabled={quantity <= 1}
+            aria-label="Decrease quantity"
+            className="h-full rounded-l-full px-4 text-lg text-charcoal transition-colors hover:bg-cream-dark disabled:opacity-30"
+          >
+            −
+          </button>
+          <span
+            aria-live="polite"
+            className="w-8 text-center text-sm font-bold text-charcoal"
+          >
+            {quantity}
+          </span>
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
+            disabled={quantity >= maxQty}
+            aria-label="Increase quantity"
+            className="h-full rounded-r-full px-4 text-lg text-charcoal transition-colors hover:bg-cream-dark disabled:opacity-30"
+          >
+            +
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={!anyStock || (selected?.stockQuantity ?? 0) === 0}
+          className={`h-12 rounded-full px-8 text-sm font-bold transition-colors ${
+            justAdded
+              ? "bg-plantain text-forest"
+              : "bg-forest text-cream hover:bg-forest-soft"
+          } disabled:cursor-not-allowed disabled:opacity-40`}
+        >
+          {justAdded
+            ? "✓ Added to cart"
+            : !anyStock
+              ? "Sold out"
+              : "Add to cart"}
+        </button>
+
+        {anyStock && (selected?.stockQuantity ?? 0) > 0 ? (
+          <Link
+            href="/cart"
+            className="text-sm font-semibold text-forest underline-offset-4 hover:underline"
+          >
+            View cart →
+          </Link>
+        ) : null}
+      </div>
     </div>
   );
 }
