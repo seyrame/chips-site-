@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/*
+ * TT Brothers design tokens — from the approved Stitch direction.
+ * Deep Natural Green / Warm Cream / Plantain Yellow + toasted brown accents.
+ */
+@theme {
+  /* Brand colors */
+  --color-forest: #0a3d2e;
+  --color-forest-deep: #072b20;
+  --color-forest-soft: #0f5240;
+  --color-cream: #fdf9f6;
+  --color-cream-dark: #f6efe7;
+  --color-plantain: #fdc003;
+  --color-plantain-deep: #e0a800;
+  --color-toast: #8a5a3b;
+  --color-toast-light: #c99a72;
+  --color-toast-dark: #5c3a24;
+  --color-charcoal: #1f1b16;
+
+  /* Typography — variables are wired to next/font in app/layout.tsx */
+  --font-display: var(--font-eb-garamond), "EB Garamond", Georgia, serif;
+  --font-sans: var(--font-hanken-grotesk), "Hanken Grotesk", system-ui, sans-serif;
+
+  /* Motion — respects reduced motion via utilities below */
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
