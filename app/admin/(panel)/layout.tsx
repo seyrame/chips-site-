@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin", enabled: true },
-  // Remaining sections land in Phase 8.
-  { label: "Products", href: "/admin/products", enabled: false },
-  { label: "Inventory", href: "/admin/inventory", enabled: false },
+  { label: "Products", href: "/admin/products", enabled: true },
+  { label: "Inventory", href: "/admin/inventory", enabled: true },
+  // Orders/Payments/Customers arrive after checkout (Phases 6-8).
   { label: "Orders", href: "/admin/orders", enabled: false },
   { label: "Payments", href: "/admin/payments", enabled: false },
   { label: "Customers", href: "/admin/customers", enabled: false },
