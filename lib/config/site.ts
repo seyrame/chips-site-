@@ -15,7 +15,13 @@ export const BRAND = {
   },
 } as const;
 
-/** WhatsApp number in international format without "+" (e.g. 233201234567). */
+/**
+ * WhatsApp number in international format without "+" (e.g. 233201234567).
+ *
+ * SERVER-SIDE ONLY: WHATSAPP_NUMBER is not NEXT_PUBLIC_-prefixed, so this
+ * returns "" in the browser. Client components must receive the link via a
+ * server component prop (or the public.* app_settings row) instead.
+ */
 export function getWhatsAppNumber(): string {
   return process.env.WHATSAPP_NUMBER ?? "";
 }

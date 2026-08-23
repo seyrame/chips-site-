@@ -27,16 +27,27 @@ let cachedPublicEnv: PublicEnv | undefined;
 export function getPublicEnv(): PublicEnv {
   if (cachedPublicEnv) return cachedPublicEnv;
 
-  const parsed = publicSchema.safeParse({
+  const raw = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-  });
+  };
 
-  if (!parsed.success) {
-    console.error(
-      "❌ Invalid public environment variables:\n" + z.prettifyError(parsed.error)
-    );
+  const parsed = publicSchema.safeParse(raw);
+
+  // Fail fast on unfilled .env.example placeholders — they would otherwise
+  // pass format checks and blow up later as confusing network errors.
+  const unfilled = Object.entries(raw)
+    .filter(
+      ([, v]) => !v || /^YOUR-/.test(v) || v.includes("YOUR-PROJECT-REF")
+    )
+    .map(([k]) => k);
+
+  if (!parsed.success || unfilled.length > 0) {
+    const detail = parsed.success
+      ? `Unconfigured placeholder values: ${unfilled.join(", ")}`
+      : z.prettifyError(parsed.error);
+    console.error("❌ Invalid public environment variables:\n" + detail);
     throw new Error(
       "Invalid public environment variables — copy .env.example to .env.local and set real values."
     );
