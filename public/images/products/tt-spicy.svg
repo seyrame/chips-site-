@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#fdf9f6"/>
+  <circle cx="120" cy="170" r="190" fill="#f6efe7"/>
+  <path d="M180 470 Q400 370 620 470 L590 650 Q400 740 210 650 Z" fill="#5c3a24"/>
+  <g>
+    <ellipse cx="330" cy="480" rx="72" ry="44" fill="#fdc003" transform="rotate(-12 330 480)"/>
+    <ellipse cx="450" cy="495" rx="74" ry="45" fill="#e0a800" transform="rotate(18 450 495)"/>
+    <ellipse cx="390" cy="450" rx="70" ry="42" fill="#ffd54d" transform="rotate(-6 390 450)"/>
+    <ellipse cx="295" cy="545" rx="66" ry="40" fill="#fdc003" transform="rotate(24 295 545)"/>
+    <ellipse cx="485" cy="555" rx="68" ry="42" fill="#ffe58a" transform="rotate(-22 485 555)"/>
+    <ellipse cx="398" cy="560" rx="70" ry="44" fill="#e0a800" transform="rotate(8 398 560)"/>
+  </g>
+  <g fill="#b3402a">
+    <circle cx="352" cy="470" r="7"/>
+    <circle cx="430" cy="520" r="6"/>
+    <circle cx="300" cy="530" r="6.5"/>
+    <circle cx="472" cy="462" r="5.5"/>
+    <circle cx="382" cy="585" r="6"/>
+    <circle cx="500" cy="512" r="5"/>
+  </g>
+  <text x="64" y="110" font-family="Georgia, 'Times New Roman', serif" font-size="34" letter-spacing="10" fill="#0a3d2e">TT BROTHERS</text>
+  <text x="64" y="850" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#0a3d2e">TT Spicy</text>
+  <text x="64" y="910" font-family="Georgia, 'Times New Roman', serif" font-size="32" fill="#b3402a" font-style="italic">Proper Ghanaian heat.</text>
+  <text x="64" y="965" font-family="Arial, sans-serif" font-size="20" letter-spacing="4" fill="#c99a72">PLACEHOLDER IMAGE — REAL PHOTOGRAPHY TO COME</text>
+</svg>

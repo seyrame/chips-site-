@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#fdf9f6"/>
+  <circle cx="700" cy="140" r="205" fill="#f6efe7"/>
+  <path d="M190 480 Q400 380 610 480 L582 645 Q400 725 220 645 Z" fill="#8a5a3b"/>
+  <g>
+    <ellipse cx="336" cy="486" rx="72" ry="44" fill="#fdc003" transform="rotate(-14 336 486)"/>
+    <ellipse cx="446" cy="498" rx="74" ry="45" fill="#e0a800" transform="rotate(16 446 498)"/>
+    <ellipse cx="388" cy="452" rx="70" ry="42" fill="#ffd54d" transform="rotate(-4 388 452)"/>
+    <ellipse cx="296" cy="542" rx="66" ry="40" fill="#fdc003" transform="rotate(22 296 542)"/>
+    <ellipse cx="482" cy="550" rx="68" ry="42" fill="#ffe58a" transform="rotate(-24 482 550)"/>
+    <ellipse cx="396" cy="556" rx="70" ry="44" fill="#e0a800" transform="rotate(6 396 556)"/>
+  </g>
+  <text x="64" y="110" font-family="Georgia, 'Times New Roman', serif" font-size="34" letter-spacing="10" fill="#0a3d2e">TT BROTHERS</text>
+  <text x="64" y="850" font-family="Georgia, 'Times New Roman', serif" font-size="76" fill="#0a3d2e">TT Original</text>
+  <text x="64" y="910" font-family="Georgia, 'Times New Roman', serif" font-size="32" fill="#8a5a3b" font-style="italic">The classic crunch.</text>
+  <text x="64" y="965" font-family="Arial, sans-serif" font-size="20" letter-spacing="4" fill="#c99a72">PLACEHOLDER IMAGE — REAL PHOTOGRAPHY TO COME</text>
+</svg>

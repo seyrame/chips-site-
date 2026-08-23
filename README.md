@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TT Brothers — E-Commerce Platform
 
-## Getting Started
+Premium Ghanaian DTC food brand. Next.js 16 (App Router, Turbopack) · TypeScript · Tailwind CSS v4 · Supabase · Paystack.
 
-First, run the development server:
+## Project Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+app/
+  (storefront)/     Customer-facing routes
+  admin/            Owner dashboard (protected)
+  api/              Route handlers (checkout, Paystack, webhooks)
+components/         UI primitives + storefront/admin components
+lib/                Env config, Supabase clients, business config
+services/           Database access & business logic
+types/              Domain types mirroring the database schema
+hooks/ utils/      Client hooks and pure helpers
+supabase/
+  migrations/       Ordered SQL migrations (single source of truth)
+  seed.sql          Development seed data (placeholder values)
+  local-verify/     Vanilla-Postgres stubs for offline verification
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+All money is stored as **integer pesewas** (GHS minor units; `GH₵35.00` = `3500`) — matching the Paystack API format exactly. Never use floats for money.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Applying the schema to a Supabase project
 
-## Learn More
+Run each file in `supabase/migrations/` **in filename order** via Dashboard → SQL Editor, then run `supabase/seed.sql` for development data. With the Supabase CLI: `supabase link` then `supabase db push`.
 
-To learn more about Next.js, take a look at the following resources:
+Migrations create: categories, products, variants (price + stock at variant level), images, customers, orders, order_items, payments, inventory_movements (audit trail), delivery regions/settings, app settings, profiles — plus RLS policies on every table and the atomic `adjust_variant_stock()` function that prevents overselling at the database level.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Roles & access model
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Identity | Access |
+|---|---|
+| anon | Read active catalog only. Zero writes anywhere. |
+| STAFF | + read business data |
+| OWNER / ADMIN | + manage catalog, orders |
+| service_role | Server pipeline only (checkout, payment verification) |
 
-## Deploy on Vercel
+Admin accounts are created by inviting users in Supabase Auth with `role: OWNER` (or ADMIN/STAFF) in their `raw_user_meta_data`. A profile without a role has no privileges.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Copy `.env.example` → `.env.local` and fill in real values. Never commit `.env.local`.
