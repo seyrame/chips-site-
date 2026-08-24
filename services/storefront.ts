@@ -71,8 +71,7 @@ export async function listFeaturedProducts(limit = 3): Promise<ShopProduct[]> {
       supabase
         .from("product_variants")
         .select("*")
-        .eq("active", true)
-        .gt("stock_quantity", 0),
+        .eq("active", true),
       supabase
         .from("product_images")
         .select("*")
@@ -119,7 +118,9 @@ export async function listShopProducts(options?: {
 
   if (categoryId) query = query.eq("category_id", categoryId);
   if (options?.search) {
-    const q = options.search.replace(/[%_,()]/g, " ").trim();
+    // Strip ilike wildcards AND PostgREST or=() metacharacters — a stray
+    // comma, paren or quote would make the whole filter 400.
+    const q = options.search.replace(/[%_,()"\\]/g, " ").trim();
     if (q) {
       query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
     }

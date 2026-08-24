@@ -42,7 +42,12 @@ function readStorage(): CartItem[] {
         i !== null &&
         typeof (i as CartItem).variantId === "string" &&
         typeof (i as CartItem).quantity === "number" &&
-        (i as CartItem).quantity > 0
+        (i as CartItem).quantity > 0 &&
+        typeof (i as CartItem).unitPrice === "number" &&
+        Number.isFinite((i as CartItem).unitPrice) &&
+        (i as CartItem).unitPrice >= 0 &&
+        typeof (i as CartItem).maxQuantity === "number" &&
+        (i as CartItem).maxQuantity > 0
     );
   } catch {
     return [];

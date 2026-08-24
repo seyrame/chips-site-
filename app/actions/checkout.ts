@@ -3,7 +3,10 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { getSiteUrl } from "@/lib/env";
+import { initializeTransaction } from "@/lib/paystack";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { generatePaymentReference } from "@/services/payments";
 
 export interface PlaceOrderState {
   error?: string;
@@ -35,6 +38,8 @@ function friendlyError(message: string): string {
       return "Please enter your delivery address.";
     case "INVALID_QUANTITY":
       return "Quantities must be between 1 and 99 per item.";
+    case "INVALID_REFERENCE":
+      return "We could not start your payment session. Please try again.";
     default:
       console.error("[placeOrder]", message);
       return "We could not place your order. Please try again in a moment.";
@@ -97,22 +102,56 @@ export async function placeOrderAction(
   const regionId = /^[0-9a-f-]{36}$/i.test(regionIdRaw) ? regionIdRaw : null;
 
   // ── Atomic pipeline via service role ──
+  // The reference is generated here (server-side, per the schema
+  // contract) and stamped onto order + payment intent in one
+  // transaction by place_order().
+  const reference = generatePaymentReference();
+
   const supabase = createAdminClient();
   const { data, error } = await supabase.rpc("place_order", {
     p_items: parsedItems.data,
     p_customer: parsedCustomer.data,
     p_region_id: regionId,
+    p_paystack_reference: reference,
   });
 
   if (error || !data) {
     return { error: friendlyError(error?.message ?? "unknown") };
   }
 
-  const result = data as { order_number?: string };
-  if (!result.order_number) {
+  const result = data as {
+    order_number?: string;
+    total?: number;
+  };
+  if (!result.order_number || typeof result.total !== "number") {
     console.error("[placeOrder] unexpected payload", data);
     return { error: "We could not confirm your order. Please contact support." };
   }
 
-  redirect(`/checkout/success?order=${encodeURIComponent(result.order_number)}`);
+  // ── Start the Paystack checkout session ─────────────────────
+  // Work happens inside try/catch; redirect() stays outside it —
+  // its control-flow error must never be swallowed.
+  let authorizationUrl: string | undefined;
+  try {
+    const session = await initializeTransaction({
+      email: parsedCustomer.data.email,
+      amount: result.total,
+      reference,
+      callbackUrl: `${getSiteUrl()}/checkout/paystack/callback`,
+      metadata: { order_number: result.order_number },
+    });
+    authorizationUrl = session.authorizationUrl;
+  } catch (cause) {
+    console.error("[placeOrder] paystack initialize failed", cause);
+  }
+
+  if (!authorizationUrl) {
+    // The order (and stock reservation) is real; only the payment
+    // session failed. Never invite a duplicate submission.
+    return {
+      error: `Your order ${result.order_number} has been reserved, but we couldn't start the payment. Please reach us and we'll send you a secure payment link — don't place the order again.`,
+    };
+  }
+
+  redirect(authorizationUrl);
 }

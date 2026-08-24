@@ -344,7 +344,11 @@ export async function adjustStockAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireManagerAccess();
+  // Authorization first (cookie session → profiles.role), then the RPC
+  // via the service-role client: adjust_variant_stock() is intentionally
+  // revoked from anon/authenticated (migration 0006) so only the trusted
+  // server pipeline can move stock. p_actor keeps the audit trail honest.
+  const admin = await requireManagerAccess();
 
   const parsed = adjustmentSchema.safeParse({
     variantId: formData.get("variant_id"),
@@ -355,12 +359,6 @@ export async function adjustStockAction(
   if (!parsed.success) {
     return { error: z.prettifyError(parsed.error).split("\n")[0] };
   }
-
-  // Authorization first (cookie session → profiles.role), then the RPC
-  // via the service-role client: adjust_variant_stock() is intentionally
-  // revoked from anon/authenticated (migration 0006) so only the trusted
-  // server pipeline can move stock. p_actor keeps the audit trail honest.
-  const admin = await requireManagerAccess();
 
   const supabase = createAdminClient();
   const { data, error } = await supabase.rpc("adjust_variant_stock", {

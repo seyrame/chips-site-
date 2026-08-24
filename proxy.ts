@@ -97,9 +97,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Everything except static assets, image optimizer output and the
-     * health endpoint. Api routes handle their own authorization.
+     * Everything except static assets, image optimizer output, the
+     * health endpoint and the Paystack webhook (which authenticates via
+     * HMAC signature and must not pay an auth round-trip per event).
      */
-    "/((?!_next/static|_next/image|favicon.ico|images|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|images|api/health|api/webhooks|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

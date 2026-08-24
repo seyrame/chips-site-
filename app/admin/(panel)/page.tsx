@@ -8,8 +8,7 @@ export default async function AdminDashboardPage({
       <header>
         <h1 className="font-display text-4xl text-forest">Dashboard</h1>
         <p className="mt-1 text-sm text-charcoal/70">
-          Catalog &amp; inventory management are live. Order metrics arrive
-          with the checkout phases.
+          Catalog, inventory, checkout and Paystack payments are live.
         </p>
       </header>
 
@@ -34,8 +33,8 @@ export default async function AdminDashboardPage({
             table, not the JWT.
           </li>
           <li>
-            Next up (Phase 5): the customer-facing storefront — home, shop and
-            product pages.
+            Next up (Phase 8): fulfilment tooling — the order status
+            workflow, refunds and customer views.
           </li>
         </ul>
       </section>

@@ -14,8 +14,8 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin", enabled: true },
   { label: "Products", href: "/admin/products", enabled: true },
   { label: "Inventory", href: "/admin/inventory", enabled: true },
-  // Orders/Payments/Customers arrive after checkout (Phases 6-8).
-  { label: "Orders", href: "/admin/orders", enabled: false },
+  { label: "Orders", href: "/admin/orders", enabled: true },
+  // Payments detail / Customers / Analytics arrive in later phases.
   { label: "Payments", href: "/admin/payments", enabled: false },
   { label: "Customers", href: "/admin/customers", enabled: false },
   { label: "Analytics", href: "/admin/analytics", enabled: false },

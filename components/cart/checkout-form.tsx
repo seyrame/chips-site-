@@ -25,7 +25,9 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
       disabled={pending || disabled}
       className="mt-2 h-13 w-full rounded-full bg-forest py-4 text-sm font-bold text-cream transition-colors hover:bg-forest-soft disabled:cursor-not-allowed disabled:opacity-50"
     >
-      {pending ? "Placing your order…" : "Place order"}
+      {pending
+        ? "Starting secure checkout…"
+        : "Continue to payment"}
     </button>
   );
 }
@@ -137,8 +139,12 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
           <div className="mt-5 grid gap-4">
             <label className={labelClass}>
               Region *
+              {/* The select carries the region_id for fee lookup; the
+                  hidden input carries the region NAME the server and
+                  orders table expect. */}
+              <input type="hidden" name="region" value={selectedRegion?.region ?? ""} />
               <select
-                name="region"
+                name="region_id"
                 required
                 value={regionId}
                 onChange={(e) => setRegionId(e.target.value)}
@@ -223,7 +229,8 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
 
         <SubmitButton disabled={!hydrated || items.length === 0 || delivery.regions.length === 0} />
         <p className="mt-3 text-center text-xs leading-relaxed text-charcoal/50">
-          You&apos;ll receive an order confirmation with payment instructions.
+          You&apos;ll be taken to Paystack&apos;s secure checkout to pay by
+          card, mobile money or bank transfer.
         </p>
       </aside>
     </form>
