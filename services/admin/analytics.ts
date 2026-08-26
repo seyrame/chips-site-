@@ -1,5 +1,6 @@
 import "server-only";
 
+import { CONFIG } from "@/lib/config/site";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -84,27 +85,30 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     paymentsAllResult,
   ] = await Promise.all([
     // Payments: last 90 days only (for revenue metrics).
-    supabase.from("payments").select("status, amount").gte("created_at", ninetyDaysIso),
+    supabase.from("payments").select("status, amount").gte("created_at", ninetyDaysIso).limit(CONFIG.maxQueryLimit),
     // Orders: last 90 days only (for status counts).
-    supabase.from("orders").select("order_status, created_at").gte("created_at", ninetyDaysIso),
+    supabase.from("orders").select("order_status, created_at").gte("created_at", ninetyDaysIso).limit(CONFIG.maxQueryLimit),
     // Customers: count only, not all rows.
     supabase.from("customers").select("id", { count: "exact", head: true }),
-    // Products + variants: small catalog, no limit needed.
-    supabase.from("products").select("id, active, featured"),
+    // Products + variants: small catalog, explicit limit for safety.
+    supabase.from("products").select("id, active, featured").limit(CONFIG.maxQueryLimit),
     supabase
       .from("product_variants")
-      .select("stock_quantity, low_stock_threshold, active"),
+      .select("stock_quantity, low_stock_threshold, active")
+      .limit(CONFIG.maxQueryLimit),
     // Order items: scoped to last 90 days via join.
     supabase
       .from("order_items")
       .select("product_name, quantity, subtotal, order:orders!inner(order_status, created_at)")
-      .gte("order->>created_at", ninetyDaysIso),
+      .gte("order.created_at", ninetyDaysIso)
+      .limit(CONFIG.maxQueryLimit),
     supabase
       .from("payments")
       .select("amount, status, created_at")
       .eq("status", "PAID")
       .gte("created_at", thirtyDaysAgo.toISOString())
-      .order("created_at"),
+      .order("created_at")
+      .limit(CONFIG.maxQueryLimit),
   ]);
 
   if (paymentsResult.error) throw paymentsResult.error;
@@ -165,7 +169,8 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     .select("customer_id")
     .neq("order_status", "CANCELLED")
     .not("customer_id", "is", null)
-    .gte("created_at", ninetyDaysIso);
+    .gte("created_at", ninetyDaysIso)
+    .limit(CONFIG.maxQueryLimit);
   const uniqueCustomerIds = new Set(orderCustomers?.map((o) => o.customer_id));
   const customerMetrics: CustomerMetrics = {
     totalCustomers: customersResult.count ?? 0,

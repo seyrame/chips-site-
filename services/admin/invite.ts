@@ -82,7 +82,23 @@ export async function createAdminInvite(
 
     if (error) throw error;
 
-    const token = generateToken();
+    // Generate a password reset token so the invitee can set their password.
+    const { data: resetData, error: resetErr } =
+      await supabase.auth.admin.generateLink({
+        type: "magiclink",
+        email: normalizedEmail,
+      });
+
+    if (resetErr || !resetData?.properties?.hashed_token) {
+      log.error("magiclink.existing_user_failed", {
+        email: normalizedEmail,
+        error: resetErr?.message,
+      });
+      throw new Error("Failed to generate invite token. Please try again.");
+    }
+
+    const token = resetData.properties.hashed_token;
+
     log.info("role.assigned", {
       email: normalizedEmail,
       role,
@@ -124,11 +140,16 @@ export async function createAdminInvite(
       email: normalizedEmail,
     });
 
-  if (resetErr) {
-    log.warn("magiclink.generate_failed", { email: normalizedEmail });
+  if (resetErr || !resetData?.properties?.hashed_token) {
+    log.error("magiclink.new_user_failed", {
+      email: normalizedEmail,
+      userId: newUser.user.id,
+      error: resetErr?.message,
+    });
+    throw new Error("Failed to generate invite token. Please try again.");
   }
 
-  const token = resetData?.properties?.hashed_token ?? generateToken();
+  const token = resetData.properties.hashed_token;
 
   log.info("invite.created", {
     email: normalizedEmail,
@@ -138,10 +159,6 @@ export async function createAdminInvite(
   });
 
   return { inviteId: newUser.user.id, email: normalizedEmail, role, token };
-}
-
-function generateToken(): string {
-  return randomBytes(32).toString("hex");
 }
 
 /**

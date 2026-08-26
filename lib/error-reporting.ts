@@ -76,15 +76,16 @@ export function captureError(report: ErrorReport): void {
 /**
  * Convenience wrapper for try/catch blocks.
  * Captures the error and returns a user-friendly fallback.
+ * Handles both sync and async functions safely.
  */
-export function withErrorCapture<T>(
+export async function withErrorCapture<T>(
   fingerprint: string,
-  fn: () => T,
+  fn: () => T | Promise<T>,
   fallback: T,
   tags?: Record<string, string>
-): T {
+): Promise<T> {
   try {
-    return fn();
+    return await fn();
   } catch (cause) {
     captureError({
       fingerprint,
