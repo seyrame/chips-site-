@@ -16,6 +16,7 @@ import "server-only";
 
 import { randomBytes } from "node:crypto";
 
+import { getPublicEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import type { UserRole } from "@/types";
@@ -162,12 +163,13 @@ export async function createAdminInvite(
 }
 
 /**
- * Build the invite URL from a token. The invitee clicks this link
- * to set their password and activate their account.
+ * Build the invite URL from a token. Points to Supabase's hosted recovery UI
+ * which natively consumes the hashed_token from generateLink('recovery').
  */
 export function buildInviteUrl(
   token: string,
   siteUrl: string
 ): string {
-  return `${siteUrl}/admin/invite/accept?token=${token}`;
+  const { NEXT_PUBLIC_SUPABASE_URL } = getPublicEnv();
+  return `${NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=${token}&type=recovery&redirect_to=${encodeURIComponent(siteUrl + "/admin")}`;
 }

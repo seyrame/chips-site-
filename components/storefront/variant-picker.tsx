@@ -46,6 +46,7 @@ export function VariantPicker({
       variants.find((v) => v.stockQuantity > 0) ?? variants[0];
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- sync with prop changes */
     setSelectedId(next?.id);
+    setQuantity(1);
   }, [variants]);
 
   // Cleanup timeout on unmount to prevent memory leak.

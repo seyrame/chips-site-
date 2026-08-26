@@ -8,7 +8,7 @@ import {
   LOGIN_LIMIT,
   API_READ_LIMIT,
 } from "@/lib/rate-limit";
-import { generateRequestId } from "@/lib/request-context";
+import { generateRequestId, runWithContext } from "@/lib/request-context";
 import { logger } from "@/lib/logger";
 
 /**
@@ -25,9 +25,14 @@ const ADMIN_PREFIX = "/admin";
 const LOGIN_PATH = "/admin/login";
 
 export async function proxy(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
   const requestId = generateRequestId();
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+
+  return runWithContext({ requestId, ip }, () => proxyInner(request, requestId, ip));
+}
+
+async function proxyInner(request: NextRequest, requestId: string, ip: string) {
+  const { pathname, search } = request.nextUrl;
 
   const responseHeaders = new Headers({ "X-Request-Id": requestId });
 
@@ -39,7 +44,7 @@ export async function proxy(request: NextRequest) {
   });
 
   // ── Rate limiting for login page ──
-  if (pathname === LOGIN_PATH && request.method === "GET") {
+  if (pathname === LOGIN_PATH) {
     const rl = checkRateLimit(rateLimitKey(ip, "login"), LOGIN_LIMIT);
     if (!rl.allowed) {
       logger.warn("rate_limit.login", { requestId, ip });
@@ -83,7 +88,9 @@ export async function proxy(request: NextRequest) {
     url.pathname = LOGIN_PATH;
     url.search = "";
     url.searchParams.set("next", `${pathname}${search}`);
-    return NextResponse.redirect(url);
+    const res = NextResponse.redirect(url);
+    res.headers.set("X-Request-Id", requestId);
+    return res;
   }
 
   // Anonymous storefront requests skip session refresh entirely.
@@ -132,7 +139,9 @@ export async function proxy(request: NextRequest) {
       url.search = "";
       url.searchParams.set("next", `${pathname}${search}`);
       url.searchParams.set("reason", "expired");
-      return NextResponse.redirect(url);
+      const res = NextResponse.redirect(url);
+      res.headers.set("X-Request-Id", requestId);
+      return res;
     }
   } catch (e) {
     logger.error("proxy.session_refresh_failed", {
@@ -145,8 +154,11 @@ export async function proxy(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = LOGIN_PATH;
       url.search = "";
+      url.searchParams.set("next", `${pathname}${search}`);
       url.searchParams.set("reason", "error");
-      return NextResponse.redirect(url);
+      const res = NextResponse.redirect(url);
+      res.headers.set("X-Request-Id", requestId);
+      return res;
     }
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 interface GalleryImage {
@@ -17,6 +17,15 @@ export function ProductGallery({
   productName: string;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Clamp index when images array shrinks (ISR revalidation).
+  useEffect(() => {
+    if (activeIndex >= images.length) {
+      /* eslint-disable-next-line react-hooks/set-state-in-effect -- sync with prop changes */
+      setActiveIndex(0);
+    }
+  }, [images.length, activeIndex]);
+
   const active = images[activeIndex] ?? null;
 
   if (!active) {
