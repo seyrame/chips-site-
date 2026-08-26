@@ -63,7 +63,7 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
 
   if (hydrated && items.length === 0) {
     return (
-      <div className="rounded-3xl border border-toast/15 bg-white p-12 text-center">
+      <div className="rounded-3xl border border-toast/15 bg-white p-8 text-center sm:p-12">
         <p className="font-display text-2xl text-forest">
           Nothing to check out yet
         </p>
@@ -198,7 +198,7 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
         <ul className="mt-4 divide-y divide-toast/10 text-sm">
           {items.map((item) => (
             <li key={item.variantId} className="flex justify-between gap-3 py-2.5">
-              <span className="text-charcoal/70">
+              <span className="min-w-0 text-charcoal/70">
                 {item.quantity}× {item.productName}{" "}
                 <span className="text-charcoal/40">({item.variantName})</span>
               </span>

@@ -30,7 +30,7 @@ function InviteAcceptInner() {
   if (!token) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
-        <h1 className="font-display text-4xl text-forest">Invalid invite link</h1>
+        <h1 className="font-display text-3xl text-forest sm:text-4xl">Invalid invite link</h1>
         <p className="mt-3 max-w-md text-sm text-charcoal/60">
           This invite link is missing a token. Please ask the person who invited
           you to send a new link.
@@ -47,13 +47,13 @@ function InviteAcceptInner() {
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
-      <h1 className="font-display text-4xl text-forest">Welcome to {BRAND.name}</h1>
+      <h1 className="font-display text-3xl text-forest sm:text-4xl">Welcome to {BRAND.name}</h1>
       <p className="mt-3 max-w-md text-sm text-charcoal/60">
         You&apos;ve been invited as an admin. Click the link in your invite
         email to set your password, or contact the person who invited you if you
         need a new link.
       </p>
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Link
           href="/admin/login"
           className="rounded-full bg-forest px-6 py-3 text-sm font-semibold text-cream hover:bg-forest-soft"

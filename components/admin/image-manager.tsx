@@ -115,7 +115,7 @@ export function ImageManager({
                       <button
                         type="submit"
                         title="Make primary"
-                        className="rounded-lg px-2 py-1 text-xs font-semibold text-forest hover:bg-cream-dark"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg text-xs font-semibold text-forest hover:bg-cream-dark"
                       >
                         ★
                       </button>
@@ -127,7 +127,7 @@ export function ImageManager({
                     <button
                       type="submit"
                       title="Delete image"
-                      className="rounded-lg px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                      className="flex h-11 w-11 items-center justify-center rounded-lg text-xs font-semibold text-red-700 hover:bg-red-50"
                       onClick={(e) => {
                         if (!window.confirm("Delete this image? This cannot be undone.")) {
                           e.preventDefault();

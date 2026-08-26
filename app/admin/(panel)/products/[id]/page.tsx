@@ -44,10 +44,10 @@ export default async function EditProductPage({
         >
           ← All products
         </Link>
-        <h1 className="mt-2 font-display text-4xl text-forest">
+        <h1 className="mt-2 font-display text-3xl font-semibold text-forest break-words sm:text-4xl">
           {product.name}
         </h1>
-        <p className="mt-1 text-sm text-charcoal/60">
+        <p className="mt-1 break-all text-sm text-charcoal/60">
           /shop/{product.slug} · in {product.category_name}
         </p>
       </header>

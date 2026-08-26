@@ -86,7 +86,7 @@ export default async function ShopPage({
         >
           <Link
             href={filterHref({ category: "" })}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${
               !category
                 ? "border-forest bg-forest text-cream"
                 : "border-forest/20 bg-white text-charcoal hover:border-forest"
@@ -98,7 +98,7 @@ export default async function ShopPage({
             <Link
               key={c.id}
               href={filterHref({ category: c.slug })}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${
                 category === c.slug
                   ? "border-forest bg-forest text-cream"
                   : "border-forest/20 bg-white text-charcoal hover:border-forest"
@@ -120,7 +120,7 @@ export default async function ShopPage({
           ))}
         </ul>
       ) : (
-        <div className="mt-16 rounded-3xl border border-toast/15 bg-white p-12 text-center">
+        <div className="mt-16 rounded-3xl border border-toast/15 bg-white p-8 text-center sm:p-12">
           <p className="font-display text-2xl text-forest">Nothing found</p>
           <p className="mt-2 text-sm text-charcoal/60">
             {search

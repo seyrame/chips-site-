@@ -10,7 +10,7 @@ export function CartBadge() {
   return (
     <Link
       href="/cart"
-      className="relative ml-1 rounded-full border border-forest/20 bg-white px-4 py-2 text-charcoal transition-colors hover:border-forest hover:text-forest"
+      className="relative ml-1 rounded-full border border-forest/20 bg-white px-4 py-3 text-charcoal transition-colors hover:border-forest hover:text-forest"
       aria-label={`Cart, ${count} item${count === 1 ? "" : "s"}`}
     >
       Cart

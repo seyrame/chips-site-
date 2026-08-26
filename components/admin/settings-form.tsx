@@ -148,7 +148,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
           </label>
         </div>
 
-        <div className="mt-5 flex items-center gap-4">
+        <div className="mt-5 flex flex-wrap items-center gap-4">
           <SaveButton />
           <span className="text-xs text-charcoal/50">
             Current default: {formatMoney(settings.defaultDeliveryFee)}

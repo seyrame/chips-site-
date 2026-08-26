@@ -55,7 +55,7 @@ export default async function AdminInventoryPage() {
       </header>
 
       {/* ── Variant stock levels ── */}
-      <section className="overflow-hidden rounded-3xl border border-toast/15 bg-white">
+      <section className="overflow-x-auto rounded-3xl border border-toast/15 bg-white">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="border-b border-toast/15 bg-cream-dark text-left text-xs uppercase tracking-widest text-charcoal/60">

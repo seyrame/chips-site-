@@ -61,7 +61,7 @@ export default async function AdminOrderDetailPage({
           </h1>
           <p className="mt-1 text-sm text-charcoal/60">
             Placed {formatDate(order.created_at)} · Ref{" "}
-            <code className="rounded bg-cream-dark px-1.5 py-0.5 text-[11px]">
+            <code className="break-all rounded bg-cream-dark px-1.5 py-0.5 text-[11px]">
               {order.paystack_reference ?? "no payment intent"}
             </code>
           </p>

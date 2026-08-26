@@ -21,7 +21,7 @@ export function CartView() {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-3xl border border-toast/15 bg-white p-12 text-center">
+      <div className="rounded-3xl border border-toast/15 bg-white p-8 text-center sm:p-12">
         <p className="font-display text-3xl text-forest">Your cart is empty</p>
         <p className="mt-3 text-sm text-charcoal/60">
           The crunch is waiting — grab a bag or three.
@@ -69,7 +69,7 @@ export function CartView() {
                 {formatMoney(item.unitPrice)}
               </p>
 
-              <div className="mt-auto flex items-center gap-4 pt-2">
+              <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
                 <div className="flex h-11 items-center rounded-full border border-forest/20">
                   <button
                     type="button"

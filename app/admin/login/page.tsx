@@ -35,7 +35,7 @@ export default async function AdminLoginPage({
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-toast">
           {BRAND.name}
         </p>
-        <h1 className="mt-3 font-display text-4xl text-forest">Owner Login</h1>
+        <h1 className="mt-3 font-display text-3xl text-forest sm:text-4xl">Owner Login</h1>
         <p className="mt-2 text-sm leading-relaxed text-charcoal/70">
           Sign in to manage products, inventory and orders.
         </p>
