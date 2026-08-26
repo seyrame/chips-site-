@@ -25,9 +25,9 @@ export async function signInAction(
   _prev: SignInState,
   formData: FormData
 ): Promise<SignInState> {
-  // Rate limit: 5 attempts per minute per IP.
-  const ip = "server-action"; // Actions don't have direct IP access; edge gate handles IP-based limiting.
-  const rl = checkRateLimit(rateLimitKey(ip, "login-action"), LOGIN_LIMIT);
+  // Rate limit: 5 attempts per minute per email address.
+  const email = typeof formData.get("email") === "string" ? String(formData.get("email")).trim().toLowerCase() : "unknown";
+  const rl = checkRateLimit(rateLimitKey(email, "login-action"), LOGIN_LIMIT);
   if (!rl.allowed) {
     return { error: "Too many login attempts. Please wait a minute and try again." };
   }

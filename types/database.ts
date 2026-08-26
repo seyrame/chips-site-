@@ -152,7 +152,7 @@ export interface DeliveryRegionRow {
 }
 
 export interface DeliverySettingsRow {
-  id: boolean;
+  id: string;
   default_fee: number;
   free_delivery_threshold: number | null;
   updated_at: string;

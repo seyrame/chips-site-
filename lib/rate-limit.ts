@@ -12,6 +12,7 @@
 export interface RateLimitStore {
   get(key: string): number[];
   set(key: string, timestamps: number[]): void;
+  delete?(key: string): void;
 }
 
 /** In-memory store — per-process, resets on cold start. */
@@ -24,6 +25,10 @@ class MemoryStore implements RateLimitStore {
 
   set(key: string, timestamps: number[]): void {
     this.store.set(key, timestamps);
+  }
+
+  delete(key: string): void {
+    this.store.delete(key);
   }
 }
 
@@ -58,6 +63,11 @@ export function checkRateLimit(
 
   // Get existing timestamps and prune expired ones.
   const timestamps = store.get(key).filter((t) => t > windowStart);
+
+  // Delete key entirely when no timestamps remain — prevents memory leak.
+  if (timestamps.length === 0) {
+    store.delete?.(key);
+  }
 
   if (timestamps.length >= config.max) {
     const oldest = timestamps[0];

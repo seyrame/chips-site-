@@ -71,7 +71,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // Storage full or unavailable — cart works in-memory for this session.
+    }
   }, [items, hydrated]);
 
   const addItem = useCallback(
@@ -81,14 +85,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (existing) {
           return current.map((i) =>
             i.variantId === item.variantId
-              ? { ...i, quantity: Math.min(i.quantity + quantity, i.maxQuantity, CONFIG.maxLineQuantity) }
+              ? { ...i, quantity: Math.max(1, Math.min(i.quantity + quantity, i.maxQuantity, CONFIG.maxLineQuantity)) }
               : i
           );
         }
         if (current.length >= MAX_LINES) return current;
         return [
           ...current,
-          { ...item, quantity: Math.min(quantity, item.maxQuantity, CONFIG.maxLineQuantity) },
+          { ...item, quantity: Math.max(1, Math.min(quantity, item.maxQuantity, CONFIG.maxLineQuantity)) },
         ];
       });
     },

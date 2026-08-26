@@ -40,7 +40,7 @@ function toShopProduct(
     categorySlug: category?.slug ?? "",
     categoryName: category?.name ?? "",
     imageUrl: primaryImage?.image_url ?? null,
-    imageAlt: primaryImage?.alt_text ?? product.name,
+    imageAlt: primaryImage?.alt_text || product.name,
     minPrice: prices.length > 0 ? Math.min(...prices) : null,
     maxPrice: prices.length > 0 ? Math.max(...prices) : null,
     inStock: variants.some((v) => v.active && v.stock_quantity > 0),

@@ -35,7 +35,13 @@ export async function GET(): Promise<Response> {
   const dbStart = Date.now();
   try {
     const supabase = createAdminClient();
-    const { error } = await supabase.from("products").select("id", { count: "exact", head: true });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const { error } = await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .abortSignal(controller.signal);
+    clearTimeout(timer);
     checks.push({
       name: "database",
       status: error ? "error" : "ok",
@@ -43,11 +49,17 @@ export async function GET(): Promise<Response> {
       message: error?.message,
     });
   } catch (e) {
+    const isConfig =
+      e instanceof Error && e.message.includes("SUPABASE_SERVICE_ROLE_KEY");
     checks.push({
       name: "database",
       status: "error",
       latencyMs: Date.now() - dbStart,
-      message: e instanceof Error ? e.message : "Unknown error",
+      message: isConfig
+        ? "Service role key not configured"
+        : e instanceof Error
+          ? e.message
+          : "Unknown error",
     });
   }
 

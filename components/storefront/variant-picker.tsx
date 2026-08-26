@@ -40,6 +40,14 @@ export function VariantPicker({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const timeoutRef = useRef<any>(null);
 
+  // Sync selection when variants change (ISR revalidation, prefetch).
+  useEffect(() => {
+    const next =
+      variants.find((v) => v.stockQuantity > 0) ?? variants[0];
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- sync with prop changes */
+    setSelectedId(next?.id);
+  }, [variants]);
+
   // Cleanup timeout on unmount to prevent memory leak.
   useEffect(() => {
     return () => {

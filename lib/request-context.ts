@@ -30,7 +30,7 @@ export function getRequestContext(): RequestContext | undefined {
   return als.getStore();
 }
 
-/** Generate a compact request ID (8 hex chars). */
+/** Generate a compact request ID (12 hex chars, collision-resistant). */
 export function generateRequestId(): string {
-  return Math.random().toString(16).slice(2, 10);
+  return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
 }

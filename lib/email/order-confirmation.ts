@@ -14,6 +14,14 @@
 import { BRAND } from "@/lib/config/site";
 import { formatMoney } from "@/utils/money";
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export interface OrderEmailData {
   orderNumber: string;
   customerName: string;
@@ -43,7 +51,7 @@ export function orderConfirmationHtml(data: OrderEmailData): string {
     .map(
       (item) => `
     <div class="item">
-      <div class="item-name">${item.name} — ${item.variantName}</div>
+      <div class="item-name">${escapeHtml(item.name)} — ${escapeHtml(item.variantName)}</div>
       <div class="item-detail">${item.quantity}× ${formatMoney(item.unitPrice)} = ${formatMoney(item.unitPrice * item.quantity)}</div>
     </div>`
     )
@@ -59,8 +67,8 @@ export function orderConfirmationHtml(data: OrderEmailData): string {
       <p>Order Confirmation</p>
     </div>
     <div class="body">
-      <h2>Thank you, ${data.customerName}!</h2>
-      <p>Your order <strong>${data.orderNumber}</strong> has been received and is being prepared.</p>
+      <h2>Thank you, ${escapeHtml(data.customerName)}!</h2>
+      <p>Your order <strong>${escapeHtml(data.orderNumber)}</strong> has been received and is being prepared.</p>
 
       <div style="margin-top:24px">
         ${items}
@@ -75,8 +83,8 @@ export function orderConfirmationHtml(data: OrderEmailData): string {
       <div style="margin-top:24px;padding:16px;background:#f9f7f3;border-radius:12px;">
         <p style="margin:0;font-size:13px;color:#666;">
           <strong>Delivery to:</strong><br/>
-          ${data.deliveryAddress}<br/>
-          ${data.deliveryCity}, ${data.deliveryRegion}
+          ${escapeHtml(data.deliveryAddress)}<br/>
+          ${escapeHtml(data.deliveryCity)}, ${escapeHtml(data.deliveryRegion)}
         </p>
       </div>
     </div>

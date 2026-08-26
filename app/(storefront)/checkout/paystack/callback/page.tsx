@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 function firstParam(value: string | string[] | undefined): string | undefined {
   const raw = Array.isArray(value) ? value[0] : value;
-  return typeof raw === "string" && raw.trim() !== "" ? raw : undefined;
+  return typeof raw === "string" && raw.trim() !== "" ? raw.trim() : undefined;
 }
 
 /**

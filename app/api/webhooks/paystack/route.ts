@@ -68,8 +68,14 @@ export async function POST(request: NextRequest) {
   });
 
   try {
-    await settleFromGatewayPayload(data, "webhook", eventName);
-    log.info("settlement.ok", { reference: data.reference, event: eventName });
+    const outcome = await settleFromGatewayPayload(data, "webhook", eventName);
+    if (outcome.kind === "paid") {
+      log.info("settlement.ok", { reference: data.reference, event: eventName });
+    } else if (outcome.kind === "unverifiable") {
+      log.error("settlement.unverifiable", { reference: data.reference, message: outcome.message });
+    } else {
+      log.warn("settlement.other", { reference: data.reference, kind: outcome.kind });
+    }
   } catch (e) {
     captureError({
       fingerprint: "webhook/settlement_threw",
@@ -105,12 +111,14 @@ function parseTransactionData(raw: unknown): PaystackTransactionData | null {
   return {
     status: typeof d.status === "string" ? d.status : "",
     reference,
-    amount: typeof d.amount === "number" ? d.amount : Number.NaN,
+    amount: typeof d.amount === "number" ? d.amount
+      : typeof d.amount === "string" && /^\d+$/.test(d.amount) ? Number(d.amount)
+      : Number.NaN,
     currency: typeof d.currency === "string" ? d.currency : "",
     channel: typeof d.channel === "string" ? d.channel : null,
     gateway_response:
       typeof d.gateway_response === "string" ? d.gateway_response : null,
-    paid_at: typeof d.paid_at === "string" ? d.paid_at : null,
+    paid_at: typeof d.paid_at === "string" && d.paid_at !== "null" ? d.paid_at : null,
     metadata:
       typeof d.metadata === "object" && d.metadata !== null
         ? (d.metadata as Record<string, unknown>)

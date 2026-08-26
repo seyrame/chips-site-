@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 
@@ -38,9 +38,12 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
     placeOrderAction,
     {}
   );
-  // Idempotency key: generated once per mount; prevents double-submit
-  // from creating duplicate orders + stock decrements.
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  // Idempotency key: generated client-side only to avoid SSR/client mismatch.
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time client init */
+    setIdempotencyKey(crypto.randomUUID());
+  }, []);
 
   const [regionId, setRegionId] = useState(
     () => delivery.regions[0]?.id ?? ""
@@ -87,7 +90,7 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
           items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity }))
         )}
       />
-      <input type="hidden" name="idempotency_key" value={idempotencyKey} />
+      {idempotencyKey && <input type="hidden" name="idempotency_key" value={idempotencyKey} />}
 
       <div className="flex flex-col gap-6">
         {state.error ? (

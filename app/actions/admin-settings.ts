@@ -90,7 +90,7 @@ export async function updateDeliverySettings(
   let freeThreshold: number | null;
   try {
     defaultFee = cedisToPesewas(parsed.data.default_fee_cedis);
-    // Treat "0" as "no threshold" — the DB has CHECK (free_delivery_threshold > 0).
+    // DB CHECK requires: null or > 0. Treat empty and "0" as null (no threshold).
     freeThreshold =
       parsed.data.free_threshold_cedis && parsed.data.free_threshold_cedis !== "0"
         ? cedisToPesewas(parsed.data.free_threshold_cedis)
