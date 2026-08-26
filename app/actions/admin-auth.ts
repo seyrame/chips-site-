@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { checkRateLimit, rateLimitKey, LOGIN_LIMIT } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 const credentialsSchema = z.object({
@@ -24,6 +25,13 @@ export async function signInAction(
   _prev: SignInState,
   formData: FormData
 ): Promise<SignInState> {
+  // Rate limit: 5 attempts per minute per IP.
+  const ip = "server-action"; // Actions don't have direct IP access; edge gate handles IP-based limiting.
+  const rl = checkRateLimit(rateLimitKey(ip, "login-action"), LOGIN_LIMIT);
+  if (!rl.allowed) {
+    return { error: "Too many login attempts. Please wait a minute and try again." };
+  }
+
   const parsed = credentialsSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),

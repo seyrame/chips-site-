@@ -40,12 +40,10 @@ as $$
 declare
   v_role text;
 begin
-  v_role := new.raw_user_meta_data ->> 'role';
-  if v_role in ('OWNER', 'ADMIN', 'STAFF') then
-    insert into public.profiles (id, role)
-    values (new.id, v_role::public.user_role)
-    on conflict (id) do nothing;
-  end if;
+  -- SECURITY: Never read roles from signup metadata. Roles are
+  -- assigned exclusively by existing admins through server-side
+  -- operations. Reading raw_user_meta_data allowed any anonymous
+  -- visitor to escalate to OWNER by calling signUp({ data: { role: 'OWNER' } }).
   return new;
 end;
 $$;

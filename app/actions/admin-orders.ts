@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
+import { BRAND } from "@/lib/config/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createRefund } from "@/lib/paystack";
 import { ORDER_TRANSITIONS } from "@/lib/order-workflow";
@@ -43,7 +45,8 @@ export async function updateOrderStatusAction(
 ): Promise<OrderActionState> {
   try {
     await requireManagerAccess();
-  } catch {
+  } catch (e) {
+    if (isRedirectError(e)) throw e;
     return { error: "You don't have permission to manage orders." };
   }
 
@@ -67,7 +70,7 @@ export async function updateOrderStatusAction(
 
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${parsed.data.orderId}`);
-  return { ok: true };
+  return { ok: true, message: `Order marked ${parsed.data.next.toLowerCase()}.` };
 }
 
 export async function refundOrderAction(
@@ -76,7 +79,8 @@ export async function refundOrderAction(
 ): Promise<OrderActionState> {
   try {
     await requireManagerAccess();
-  } catch {
+  } catch (e) {
+    if (isRedirectError(e)) throw e;
     return { error: "You don't have permission to issue refunds." };
   }
 
@@ -109,7 +113,7 @@ export async function refundOrderAction(
   try {
     await createRefund(
       order.paystack_reference,
-      `TT Brothers ${order.order_number} full refund`
+      `${BRAND.name} ${order.order_number} full refund`
     );
   } catch (cause) {
     console.error("[admin-orders] paystack refund rejected:", cause);

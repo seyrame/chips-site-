@@ -79,11 +79,16 @@ where v.stock_quantity > 0
 -- Branded SVG placeholders ship in /public/images/products/.
 -- Replace with real photography via the admin dashboard.
 insert into public.product_images (product_id, image_url, alt_text, sort_order)
-values
+select * from (values
   ('b0000000-0000-4000-8000-000000000001', '/images/products/tt-original.svg',      'TT Original plantain chips pack',    0),
   ('b0000000-0000-4000-8000-000000000001', '/images/products/tt-original-open.svg', 'TT Original chips served in a bowl', 1),
   ('b0000000-0000-4000-8000-000000000002', '/images/products/tt-spicy.svg',         'TT Spicy plantain chips pack',       0),
-  ('b0000000-0000-4000-8000-000000000003', '/images/products/tt-sweet.svg',         'TT Sweet plantain chips pack',       0);
+  ('b0000000-0000-4000-8000-000000000003', '/images/products/tt-sweet.svg',         'TT Sweet plantain chips pack',       0)
+) as v(product_id, image_url, alt_text, sort_order)
+where not exists (
+  select 1 from public.product_images i
+  where i.product_id = v.product_id and i.image_url = v.image_url
+);
 
 -- ── Delivery regions ────────────────────────────────────────────
 -- Ghana's 16 regions. WARNING: FEES ARE PLACEHOLDERS (GHc15 flat).

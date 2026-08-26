@@ -38,6 +38,9 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
     placeOrderAction,
     {}
   );
+  // Idempotency key: generated once per mount; prevents double-submit
+  // from creating duplicate orders + stock decrements.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const [regionId, setRegionId] = useState(
     () => delivery.regions[0]?.id ?? ""
@@ -84,6 +87,7 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
           items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity }))
         )}
       />
+      <input type="hidden" name="idempotency_key" value={idempotencyKey} />
 
       <div className="flex flex-col gap-6">
         {state.error ? (
@@ -228,6 +232,12 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
         </dl>
 
         <SubmitButton disabled={!hydrated || items.length === 0 || delivery.regions.length === 0} />
+        {delivery.regions.length === 0 ? (
+          <p className="mt-2 text-center text-xs font-semibold text-red-700">
+            Delivery is not available right now — no regions are configured.
+            Please contact us via WhatsApp for assistance.
+          </p>
+        ) : null}
         <p className="mt-3 text-center text-xs leading-relaxed text-charcoal/50">
           You&apos;ll be taken to Paystack&apos;s secure checkout to pay by
           card, mobile money or bank transfer.

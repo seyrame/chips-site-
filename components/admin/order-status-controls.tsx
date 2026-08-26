@@ -123,6 +123,10 @@ export function OrderFulfilmentControls({
             <p key={i} role="alert" className="mt-2 text-xs text-red-700">
               {s.error}
             </p>
+          ) : s.message ? (
+            <p key={i} role="status" className="mt-2 text-xs text-forest">
+              ✓ {s.message}
+            </p>
           ) : null
         )}
       </div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { useCart } from "@/components/cart/cart-provider";
+import { CONFIG } from "@/lib/config/site";
 import { formatMoney } from "@/utils/money";
 
 export function CartView() {
@@ -86,7 +87,7 @@ export function CartView() {
                     type="button"
                     onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                     aria-label={`Increase quantity of ${item.productName} ${item.variantName}`}
-                    disabled={item.quantity >= Math.min(item.maxQuantity, 99)}
+                    disabled={item.quantity >= Math.min(item.maxQuantity, CONFIG.maxLineQuantity)}
                     title={
                       item.maxQuantity <= 99
                         ? `Only ${item.maxQuantity} in stock`

@@ -181,7 +181,7 @@ begin
   values (v_email, v_phone, v_customer_name)
   on conflict (lower(email::text)) where email is not null do update
     set phone = coalesce(excluded.phone, customers.phone),
-        full_name = coalesce(customers.full_name, excluded.full_name);
+        full_name = coalesce(excluded.full_name, customers.full_name);
 
   -- ── Order + snapshot items ──────────────────────────────────
   insert into orders (

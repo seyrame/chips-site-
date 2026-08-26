@@ -8,7 +8,6 @@ import {
   getProductById,
   listCategories,
 } from "@/services/admin/products";
-import { pesewasToCedis } from "@/utils/money";
 
 export const metadata: Metadata = {
   title: "Edit product",
@@ -30,7 +29,7 @@ export default async function EditProductPage({
     key: `db-${v.id}`,
     id: v.id,
     name: v.name,
-    priceCedis: String(pesewasToCedis(Number(v.price))),
+    priceCedis: String(Number(v.price) / 100),
     stockQuantity: String(v.stock_quantity),
     lowStockThreshold: String(v.low_stock_threshold),
     sku: v.sku ?? "",

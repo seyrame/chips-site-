@@ -1,5 +1,6 @@
 import "server-only";
 
+import { BRAND } from "@/lib/config/site";
 import { requireServerSecret } from "@/lib/env";
 
 /**
@@ -124,7 +125,7 @@ export async function initializeTransaction(
   }>("POST", "/transaction/initialize", {
     email: input.email,
     amount: input.amount,
-    currency: "GHS",
+    currency: BRAND.currency.code,
     reference: input.reference,
     callback_url: input.callbackUrl,
     metadata: input.metadata,
@@ -155,10 +156,20 @@ export async function initializeTransaction(
 export async function verifyTransaction(
   reference: string
 ): Promise<PaystackTransactionData | null> {
-  const raw = await paystackRequest<unknown>(
-    "GET",
-    `/transaction/verify/${encodeURIComponent(reference)}`
-  );
+  let raw: unknown;
+  try {
+    raw = await paystackRequest<unknown>(
+      "GET",
+      `/transaction/verify/${encodeURIComponent(reference)}`
+    );
+  } catch (e) {
+    // Paystack returns 400/404 for non-existent references — treat as "not found"
+    // rather than throwing, so callers can distinguish "not paid" from "can't tell".
+    if (e instanceof PaystackApiError && (e.status === 400 || e.status === 404)) {
+      return null;
+    }
+    throw e;
+  }
 
   if (!isRecord(raw)) return null;
 

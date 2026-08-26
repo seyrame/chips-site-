@@ -59,7 +59,9 @@ export async function requireManagerAccess(
   nextPath = "/admin"
 ): Promise<AdminUser> {
   const admin = await requirePanelAccess(nextPath);
-  if (admin.role === "STAFF") {
+  // Whitelist: only OWNER and ADMIN pass. Any future role (VIEWER,
+  // AUDITOR, etc.) is denied by default.
+  if (admin.role !== "OWNER" && admin.role !== "ADMIN") {
     redirect("/admin?denied=1");
   }
   return admin;

@@ -6,13 +6,16 @@
  * Paystack API expects. Never use floats for money.
  */
 
+import { BRAND } from "@/lib/config/site";
+
 const CEDIS_FORMAT = new Intl.NumberFormat("en-GH", {
   style: "currency",
-  currency: "GHS",
+  currency: BRAND.currency.code,
 });
 
 /** 3500 → "GH₵35.00" */
 export function formatMoney(pesewas: number): string {
+  if (!Number.isFinite(pesewas)) return `${BRAND.currency.symbol}0.00`;
   return CEDIS_FORMAT.format(pesewas / 100);
 }
 

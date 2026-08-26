@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { BRAND } from "@/lib/config/site";
 import { listCustomerSummaries } from "@/services/admin/customers";
 import { formatMoney } from "@/utils/money";
 
@@ -11,7 +12,7 @@ const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
   month: "short",
   year: "numeric",
-  timeZone: "Africa/Accra",
+  timeZone: BRAND.timezone,
 });
 
 export default async function AdminCustomersPage() {

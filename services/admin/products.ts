@@ -22,7 +22,7 @@ export async function listCategories(): Promise<Category[]> {
     .select("*")
     .order("sort_order");
   if (error) throw error;
-  return data;
+  return data ?? [];
 }
 
 export interface ProductListItem {

@@ -48,7 +48,9 @@ export async function listCustomerSummaries(limit = 200): Promise<CustomerSummar
       entry.lifetimeValue += Number(order.total);
     }
     // Orders arrive newest-first; first sighting is the latest.
-    entry.lastOrderAt ??= order.created_at;
+    if (entry.lastOrderAt === null) {
+      entry.lastOrderAt = order.created_at;
+    }
     stats.set(order.customer_id, entry);
   }
 
@@ -68,7 +70,7 @@ export async function listCustomerSummaries(limit = 200): Promise<CustomerSummar
       createdAt: c.created_at,
       orderCount: s?.orderCount ?? 0,
       lifetimeValue: s?.lifetimeValue ?? 0,
-      lastOrderAt: s?.lastOrderAt,
+      lastOrderAt: s?.lastOrderAt ?? null,
     };
   });
 }

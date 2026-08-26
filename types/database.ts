@@ -98,6 +98,7 @@ export interface OrderRow {
   payment_status: PaymentStatus;
   order_status: OrderStatus;
   paystack_reference: string | null;
+  idempotency_key: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -151,7 +152,7 @@ export interface DeliveryRegionRow {
 }
 
 export interface DeliverySettingsRow {
-  id: true;
+  id: boolean;
   default_fee: number;
   free_delivery_threshold: number | null;
   updated_at: string;

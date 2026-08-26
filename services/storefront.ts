@@ -1,5 +1,6 @@
 import "server-only";
 
+import { CONFIG } from "@/lib/config/site";
 import { createClient } from "@/lib/supabase/server";
 import type { Category, ProductImageRow, ProductVariantRow } from "@/types";
 
@@ -71,11 +72,13 @@ export async function listFeaturedProducts(limit = 3): Promise<ShopProduct[]> {
       supabase
         .from("product_variants")
         .select("*")
-        .eq("active", true),
+        .eq("active", true)
+        .limit(CONFIG.maxQueryLimit),
       supabase
         .from("product_images")
         .select("*")
-        .order("sort_order"),
+        .order("sort_order")
+        .limit(CONFIG.maxQueryLimit),
     ]);
 
   if (pErr || vErr || iErr) throw (pErr ?? vErr ?? iErr);
@@ -129,8 +132,8 @@ export async function listShopProducts(options?: {
   const [{ data: products, error: pErr }, { data: variants, error: vErr }, { data: images, error: iErr }] =
     await Promise.all([
       query,
-      supabase.from("product_variants").select("*").eq("active", true),
-      supabase.from("product_images").select("*").order("sort_order"),
+      supabase.from("product_variants").select("*").eq("active", true).limit(CONFIG.maxQueryLimit),
+      supabase.from("product_images").select("*").order("sort_order").limit(CONFIG.maxQueryLimit),
     ]);
 
   if (pErr || vErr || iErr) throw (pErr ?? vErr ?? iErr);

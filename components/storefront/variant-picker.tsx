@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import { useCart } from "@/components/cart/cart-provider";
+import { CONFIG } from "@/lib/config/site";
 import type { CartItem } from "@/types";
 import { formatMoney } from "@/utils/money";
 
@@ -36,9 +37,18 @@ export function VariantPicker({
   );
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const timeoutRef = useRef<any>(null);
+
+  // Cleanup timeout on unmount to prevent memory leak.
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const selected = variants.find((v) => v.id === selectedId);
-  const maxQty = Math.min(selected?.stockQuantity ?? 1, 99);
+  const maxQty = Math.min(selected?.stockQuantity ?? 1, CONFIG.maxLineQuantity);
   const anyStock = variants.some((v) => v.stockQuantity > 0);
 
   function handleAdd() {
@@ -56,7 +66,8 @@ export function VariantPicker({
     };
     addItem(line, quantity);
     setJustAdded(true);
-    window.setTimeout(() => setJustAdded(false), 2000);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = window.setTimeout(() => setJustAdded(false), 2000);
   }
 
   return (
@@ -156,7 +167,9 @@ export function VariantPicker({
             ? "✓ Added to cart"
             : !anyStock
               ? "Sold out"
-              : "Add to cart"}
+              : (selected?.stockQuantity ?? 0) === 0
+                ? "Sold out"
+                : "Add to cart"}
         </button>
 
         {anyStock && (selected?.stockQuantity ?? 0) > 0 ? (

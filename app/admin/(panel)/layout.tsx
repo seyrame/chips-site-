@@ -6,7 +6,7 @@ import { BRAND } from "@/lib/config/site";
 import { requirePanelAccess } from "@/services/admin/auth";
 
 export const metadata: Metadata = {
-  title: { default: "Admin", template: "%s · TT Admin" },
+  title: { default: "Admin", template: `%s \u00b7 ${BRAND.name} Admin` },
   robots: { index: false, follow: false },
 };
 
@@ -15,11 +15,10 @@ const NAV_ITEMS = [
   { label: "Products", href: "/admin/products", enabled: true },
   { label: "Inventory", href: "/admin/inventory", enabled: true },
   { label: "Orders", href: "/admin/orders", enabled: true },
-  // Payments detail / Analytics / Settings arrive in later phases.
-  { label: "Payments", href: "/admin/payments", enabled: false },
+  { label: "Payments", href: "/admin/payments", enabled: true },
   { label: "Customers", href: "/admin/customers", enabled: true },
-  { label: "Analytics", href: "/admin/analytics", enabled: false },
-  { label: "Settings", href: "/admin/settings", enabled: false },
+  { label: "Analytics", href: "/admin/analytics", enabled: true },
+  { label: "Settings", href: "/admin/settings", enabled: true },
 ] as const;
 
 export default async function AdminPanelLayout({
@@ -87,7 +86,7 @@ export default async function AdminPanelLayout({
       </main>
 
       <footer className="bg-forest-deep py-4 text-center text-xs text-cream/40">
-        {BRAND.name} admin · authorized access only
+        {BRAND.name} admin · authorized access only · Built by Komla
       </footer>
     </div>
   );

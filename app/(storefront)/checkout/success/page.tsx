@@ -19,8 +19,10 @@ export default async function CheckoutSuccessPage({
 }: PageProps<"/checkout/success">) {
   const params = await searchParams;
   const orderNumber = firstParam(params.order) ?? "your order";
-  // Only set by our own callback route after server-side verification.
-  const paid = params.paid === "1" || params.paid === "true";
+  // Don't trust the `paid` query param — anyone can append &paid=1 to
+  // the URL. Always show the safe "order received" state; the callback
+  // page's redirect carries the real confirmation.
+  const paid = false;
   const supportLink = buildOrderSupportLink(orderNumber);
 
   return (

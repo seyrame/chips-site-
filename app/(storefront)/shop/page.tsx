@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     "Browse small-batch Ghanaian plantain chips. Original, sweet and spicy — delivered fresh.",
 };
 
+/** Revalidate the shop index every 60 seconds (ISR). */
+export const revalidate = 60;
+
 function firstParam(value: string | string[] | undefined): string | undefined {
   const raw = Array.isArray(value) ? value[0] : value;
   return typeof raw === "string" && raw.trim() !== "" ? raw.trim() : undefined;

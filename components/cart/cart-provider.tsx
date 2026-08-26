@@ -8,6 +8,8 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { CONFIG } from "@/lib/config/site";
 import type { ReactNode } from "react";
 
 import type { CartItem } from "@/types";
@@ -79,14 +81,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (existing) {
           return current.map((i) =>
             i.variantId === item.variantId
-              ? { ...i, quantity: Math.min(i.quantity + quantity, i.maxQuantity, 99) }
+              ? { ...i, quantity: Math.min(i.quantity + quantity, i.maxQuantity, CONFIG.maxLineQuantity) }
               : i
           );
         }
         if (current.length >= MAX_LINES) return current;
         return [
           ...current,
-          { ...item, quantity: Math.min(quantity, item.maxQuantity, 99) },
+          { ...item, quantity: Math.min(quantity, item.maxQuantity, CONFIG.maxLineQuantity) },
         ];
       });
     },
@@ -97,7 +99,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((current) =>
       current.map((i) =>
         i.variantId === variantId
-          ? { ...i, quantity: Math.max(1, Math.min(quantity, i.maxQuantity, 99)) }
+          ? { ...i, quantity: Math.max(1, Math.min(quantity, i.maxQuantity, CONFIG.maxLineQuantity)) }
           : i
       )
     );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { BRAND } from "@/lib/config/site";
 import { listRecentOrders } from "@/services/admin/orders";
 import { formatMoney } from "@/utils/money";
 
@@ -13,7 +14,7 @@ const CREATED_AT_FORMAT = new Intl.DateTimeFormat("en-GB", {
   month: "short",
   hour: "2-digit",
   minute: "2-digit",
-  timeZone: "Africa/Accra",
+  timeZone: BRAND.timezone,
 });
 
 export default async function AdminOrdersPage() {

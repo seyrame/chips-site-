@@ -13,6 +13,17 @@ export const BRAND = {
     code: "GHS",
     symbol: "GH₵",
   },
+  timezone: "Africa/Accra",
+} as const;
+
+/** Business-wide constants — single source of truth. */
+export const CONFIG = {
+  /** Max quantity per line item in cart / checkout. */
+  maxLineQuantity: 99,
+  /** Supabase storage bucket for product images. */
+  storageBucket: "product-images",
+  /** Max rows returned from storefront variant/image queries. */
+  maxQueryLimit: 10_000,
 } as const;
 
 /**
@@ -33,10 +44,10 @@ export function buildWhatsAppLink(message: string): string | null {
 }
 
 export const WHATSAPP_DEFAULT_MESSAGE =
-  "Hello TT Brothers, I need help with my order.";
+  `Hello ${BRAND.name}, I need help with my order.`;
 
 export function buildOrderSupportLink(orderNumber: string): string | null {
   return buildWhatsAppLink(
-    `Hello TT Brothers, I need help with my order ${orderNumber}.`
+    `Hello ${BRAND.name}, I need help with my order ${orderNumber}.`
   );
 }

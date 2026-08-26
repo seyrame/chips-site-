@@ -128,6 +128,11 @@ export function ImageManager({
                       type="submit"
                       title="Delete image"
                       className="rounded-lg px-2 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        if (!window.confirm("Delete this image? This cannot be undone.")) {
+                          e.preventDefault();
+                        }
+                      }}
                     >
                       ✕
                     </button>

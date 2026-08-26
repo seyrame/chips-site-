@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BRAND } from "@/lib/config/site";
 import { OrderFulfilmentControls } from "@/components/admin/order-status-controls";
 import { formatMoney } from "@/utils/money";
 import { getOrderDetail } from "@/services/admin/orders";
@@ -31,14 +32,13 @@ function formatDate(iso: string | null): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: BRAND.timezone,
   });
 }
 
 export default async function AdminOrderDetailPage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+}: PageProps<"/admin/orders/[id]">) {
   const { id } = await params;
   const detail = await getOrderDetail(id);
   if (!detail) notFound();

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { CONFIG } from "@/lib/config/site";
 import { requireManagerAccess } from "@/services/admin/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/app/actions/admin-products";
@@ -42,7 +43,7 @@ export async function uploadProductImageAction(
   const path = `${productId}/${crypto.randomUUID()}-${safeName}`;
 
   const { error: uploadError } = await supabase.storage
-    .from("product-images")
+    .from(CONFIG.storageBucket)
     .upload(path, file, { contentType: file.type, upsert: false });
 
   if (uploadError) {
@@ -51,7 +52,7 @@ export async function uploadProductImageAction(
   }
 
   const { data: publicUrl } = supabase.storage
-    .from("product-images")
+    .from(CONFIG.storageBucket)
     .getPublicUrl(path);
 
   // New images append to the end of the gallery.
@@ -73,7 +74,7 @@ export async function uploadProductImageAction(
 
   if (insertError) {
     // Orphan cleanup — don't leave stray objects in the bucket.
-    await supabase.storage.from("product-images").remove([path]);
+    await supabase.storage.from(CONFIG.storageBucket).remove([path]);
     console.error("[uploadProductImage]", insertError);
     return { error: "Could not attach the image. Please try again." };
   }
@@ -145,7 +146,7 @@ export async function deleteProductImageAction(formData: FormData) {
   if (image?.image_url.includes("/product-images/")) {
     const bucketPath = image.image_url.split("/product-images/")[1];
     if (bucketPath) {
-      await supabase.storage.from("product-images").remove([bucketPath]);
+      await supabase.storage.from(CONFIG.storageBucket).remove([bucketPath]);
     }
   }
 

@@ -129,7 +129,6 @@ function parseVariants(formData: FormData): ParsedVariant[] | string {
       stockQuantity: stocks[i] ?? "0",
       lowStockThreshold: thresholds[i] ?? "5",
       sku: skus[i] ?? "",
-      active: true,
     }))
     .filter((r) => r.name.trim() !== "" || r.priceCedis.trim() !== "");
 
@@ -168,8 +167,12 @@ async function replaceVariants(productId: string, variants: ParsedVariant[]) {
 
   const { data: existing } = await supabase
     .from("product_variants")
-    .select("id")
+    .select("id, active")
     .eq("product_id", productId);
+
+  // Preserve existing active state so editing a product never reactivates
+  // variants that were deliberately deactivated via the inventory page.
+  const activeMap = new Map((existing ?? []).map((e) => [e.id, e.active]));
 
   const toDelete = (existing ?? [])
     .map((e) => e.id)
@@ -191,7 +194,7 @@ async function replaceVariants(productId: string, variants: ParsedVariant[]) {
       stock_quantity: v.stock_quantity,
       low_stock_threshold: v.low_stock_threshold,
       sku: v.sku,
-      active: v.active,
+      active: v.id ? (activeMap.get(v.id) ?? true) : true,
       sort_order: index,
     };
     if (v.id) {
@@ -336,6 +339,8 @@ const adjustmentSchema = z.object({
   delta: z.coerce
     .number()
     .int("Adjust by whole units")
+    .min(-10000, "Cannot adjust by more than 10,000 units")
+    .max(10000, "Cannot adjust by more than 10,000 units")
     .refine((n) => n !== 0, "Adjustment cannot be zero"),
   note: z.string().trim().max(280).optional().or(z.literal("")),
 });

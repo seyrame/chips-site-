@@ -1,9 +1,13 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 
+import { captureError } from "@/lib/error-reporting";
 import { requireServerSecret } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import type { PaystackTransactionData } from "@/lib/paystack";
 import { settleFromGatewayPayload } from "@/services/payments";
+
+const log = logger.child("webhook.paystack");
 
 /**
  * Paystack webhook receiver.
@@ -28,6 +32,7 @@ export async function POST(request: NextRequest) {
   const signature = request.headers.get("x-paystack-signature");
 
   if (!signature || !isValidSignature(rawBody, signature)) {
+    log.warn("invalid_signature", { ip: request.headers.get("x-forwarded-for")?.split(",")[0] });
     return new Response("Invalid signature", { status: 401 });
   }
 
@@ -35,8 +40,10 @@ export async function POST(request: NextRequest) {
   try {
     event = JSON.parse(rawBody);
   } catch {
-    console.error("[paystack-webhook] malformed JSON body");
-    return Response.json({ received: true });
+    log.error("malformed_body");
+    // Return 500 so Paystack retries — a malformed body may be a
+    // truncated legitimate event that would otherwise be lost.
+    return new Response("Malformed body", { status: 500 });
   }
 
   const eventName = typeof event.event === "string" ? event.event : "";
@@ -44,9 +51,7 @@ export async function POST(request: NextRequest) {
 
   if (!data) {
     if (eventName === "charge.success" || eventName === "charge.failed") {
-      console.error(
-        `[paystack-webhook] ${eventName} arrived without a usable payload`
-      );
+      log.error("event.no_payload", { event: eventName });
     }
     return Response.json({ received: true });
   }
@@ -55,7 +60,25 @@ export async function POST(request: NextRequest) {
     return Response.json({ received: true });
   }
 
-  await settleFromGatewayPayload(data, "webhook", eventName);
+  log.info("event.received", {
+    event: eventName,
+    reference: data.reference,
+    amount: data.amount,
+    status: data.status,
+  });
+
+  try {
+    await settleFromGatewayPayload(data, "webhook", eventName);
+    log.info("settlement.ok", { reference: data.reference, event: eventName });
+  } catch (e) {
+    captureError({
+      fingerprint: "webhook/settlement_threw",
+      message: e instanceof Error ? e.message : String(e),
+      level: "error",
+      cause: e,
+      tags: { reference: data.reference, event: eventName },
+    });
+  }
 
   return Response.json({ received: true });
 }

@@ -4,8 +4,11 @@ import { notFound } from "next/navigation";
 
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { VariantPicker } from "@/components/storefront/variant-picker";
-import { buildWhatsAppLink } from "@/lib/config/site";
+import { BRAND, buildWhatsAppLink } from "@/lib/config/site";
 import { getProductBySlug } from "@/services/storefront";
+
+/** Revalidate product pages every 60 seconds (ISR). */
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -38,7 +41,7 @@ export default async function ProductPage({
   if (!product) notFound();
 
   const whatsappLink = buildWhatsAppLink(
-    `Hello TT Brothers, I would like to order ${product.name}.`
+    `Hello ${BRAND.name}, I would like to order ${product.name}.`
   );
 
   return (

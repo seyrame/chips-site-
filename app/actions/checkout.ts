@@ -3,10 +3,15 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { captureError } from "@/lib/error-reporting";
+import { CONFIG } from "@/lib/config/site";
 import { getSiteUrl } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import { initializeTransaction } from "@/lib/paystack";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generatePaymentReference } from "@/services/payments";
+
+const log = logger.child("checkout");
 
 export interface PlaceOrderState {
   error?: string;
@@ -41,7 +46,7 @@ function friendlyError(message: string): string {
     case "INVALID_REFERENCE":
       return "We could not start your payment session. Please try again.";
     default:
-      console.error("[placeOrder]", message);
+      log.error("friendly_error", { code: message });
       return "We could not place your order. Please try again in a moment.";
   }
 }
@@ -61,7 +66,7 @@ const customerSchema = z.object({
 
 const lineSchema = z.object({
   variant_id: z.uuid(),
-  quantity: z.number().int().min(1).max(99),
+  quantity: z.number().int().min(1).max(CONFIG.maxLineQuantity),
 });
 
 export async function placeOrderAction(
@@ -101,11 +106,28 @@ export async function placeOrderAction(
   const regionIdRaw = String(formData.get("region_id") ?? "");
   const regionId = /^[0-9a-f-]{36}$/i.test(regionIdRaw) ? regionIdRaw : null;
 
+  // Idempotency key: client generates once on mount; prevents double-submit
+  // from creating duplicate orders + stock decrements.
+  const idempotencyKey = String(formData.get("idempotency_key") ?? "");
+  const safeIdempotencyKey =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      idempotencyKey
+    )
+      ? idempotencyKey
+      : null;
+
   // ── Atomic pipeline via service role ──
   // The reference is generated here (server-side, per the schema
   // contract) and stamped onto order + payment intent in one
   // transaction by place_order().
   const reference = generatePaymentReference();
+
+  log.info("order.placing", {
+    email: parsedCustomer.data.email,
+    itemCount: parsedItems.data.length,
+    reference,
+    idempotencyKey: safeIdempotencyKey,
+  });
 
   const supabase = createAdminClient();
   const { data, error } = await supabase.rpc("place_order", {
@@ -113,9 +135,11 @@ export async function placeOrderAction(
     p_customer: parsedCustomer.data,
     p_region_id: regionId,
     p_paystack_reference: reference,
+    p_idempotency_key: safeIdempotencyKey,
   });
 
   if (error || !data) {
+    log.error("place_order_failed", { error: error?.message });
     return { error: friendlyError(error?.message ?? "unknown") };
   }
 
@@ -124,9 +148,14 @@ export async function placeOrderAction(
     total?: number;
   };
   if (!result.order_number || typeof result.total !== "number") {
-    console.error("[placeOrder] unexpected payload", data);
+    log.error("place_order_unexpected_payload", { data });
     return { error: "We could not confirm your order. Please contact support." };
   }
+
+  log.info("order.created", {
+    orderNumber: result.order_number,
+    total: result.total,
+  });
 
   // ── Start the Paystack checkout session ─────────────────────
   // Work happens inside try/catch; redirect() stays outside it —
@@ -142,7 +171,13 @@ export async function placeOrderAction(
     });
     authorizationUrl = session.authorizationUrl;
   } catch (cause) {
-    console.error("[placeOrder] paystack initialize failed", cause);
+    captureError({
+      fingerprint: "checkout/paystack_init_failed",
+      message: cause instanceof Error ? cause.message : String(cause),
+      level: "error",
+      cause,
+      tags: { orderNumber: result.order_number, reference },
+    });
   }
 
   if (!authorizationUrl) {
