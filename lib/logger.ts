@@ -21,8 +21,11 @@ const LEVEL_WEIGHT: Record<LogLevel, number> = {
   error: 3,
 };
 
-const currentLevel: LogLevel =
-  (process.env.LOG_LEVEL as LogLevel) ?? "info";
+const VALID_LEVELS = new Set<LogLevel>(["debug", "info", "warn", "error"]);
+const rawLevel = process.env.LOG_LEVEL?.toLowerCase();
+const currentLevel: LogLevel = VALID_LEVELS.has(rawLevel as LogLevel)
+  ? (rawLevel as LogLevel)
+  : "info";
 
 function shouldLog(level: LogLevel): boolean {
   return LEVEL_WEIGHT[level] >= LEVEL_WEIGHT[currentLevel];

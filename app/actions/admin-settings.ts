@@ -6,7 +6,6 @@ import { z } from "zod";
 import { WHATSAPP_DEFAULT_MESSAGE } from "@/lib/config/site";
 import { requireManagerAccess } from "@/services/admin/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { cedisToPesewas } from "@/utils/money";
 
 export interface SettingsActionState {
@@ -101,7 +100,7 @@ export async function updateDeliverySettings(
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { error: deliveryErr } = await supabase
       .from("delivery_settings")
       .update({

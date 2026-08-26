@@ -125,6 +125,8 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
                 type="tel"
                 name="phone"
                 required
+                pattern="0[0245789]\d{8}"
+                inputMode="numeric"
                 className={inputClass}
                 autoComplete="tel"
                 placeholder="0201234567"

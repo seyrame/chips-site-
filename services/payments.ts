@@ -2,11 +2,14 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 
+import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   verifyTransaction,
   type PaystackTransactionData,
 } from "@/lib/paystack";
+
+const log = logger.child("payments");
 
 /**
  * Payment settlement pipeline — shared by the customer-facing callback
@@ -58,9 +61,7 @@ export async function settleFromGatewayPayload(
 
   // Not-yet-terminal states are left alone; nothing to record yet.
   if (data.status !== "success" && data.status !== "failed") {
-    console.warn(
-      `[payments:${source}] non-terminal transaction state "${data.status}" for ${data.reference}`
-    );
+    log.warn("non_terminal_state", { source, status: data.status, reference: data.reference });
     return {
       kind: "pending",
       orderNumber: readOrderNumber(data),
@@ -84,16 +85,14 @@ export async function settleFromGatewayPayload(
 
   if (error) {
     // UNKNOWN_REFERENCE etc. Log loudly, but let callers answer politely.
-    console.error(`[payments:${source}] settle_payment failed`, error.message);
+    log.error("settle_payment_failed", { source, error: error.message });
     return { kind: "unverifiable", message: error.message };
   }
 
   const settled = result as SettleResult;
 
   if (settled.mismatch) {
-    console.error(
-      `[payments:${source}] AMOUNT MISMATCH for ${data.reference} — kept PENDING for review`
-    );
+    log.error("amount_mismatch", { source, reference: data.reference });
     return {
       kind: "unverifiable",
       message: "Amount reported by the gateway does not match the order.",
@@ -102,9 +101,7 @@ export async function settleFromGatewayPayload(
 
   if (settled.payment_status === "PAID") {
     if (!settled.already_settled && source === "webhook") {
-      console.info(
-        `[payments:webhook] order ${settled.order_number} marked PAID (${data.reference})`
-      );
+      log.info("order_paid", { orderNumber: settled.order_number, reference: data.reference });
     }
     return { kind: "paid", orderNumber: settled.order_number ?? "" };
   }
@@ -124,7 +121,7 @@ export async function verifyAndSettle(
   try {
     data = await verifyTransaction(reference);
   } catch (cause) {
-    console.error("[payments:callback] verify failed", cause);
+    log.error("verify_failed", { reference, error: cause instanceof Error ? cause.message : String(cause) });
     return {
       kind: "unverifiable",
       message: "We could not reach the payment gateway. Please try again.",

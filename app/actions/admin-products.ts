@@ -330,6 +330,7 @@ export async function toggleProductActiveAction(formData: FormData) {
 
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${productId}`);
+  revalidatePath("/shop");
 }
 
 /* ── Stock adjustments ──────────────────────────────────────── */

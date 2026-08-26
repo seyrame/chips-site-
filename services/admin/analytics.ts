@@ -70,6 +70,10 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  const ninetyDaysIso = ninetyDaysAgo.toISOString();
+
   const [
     paymentsResult,
     ordersResult,
@@ -79,16 +83,22 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     orderItemsResult,
     paymentsAllResult,
   ] = await Promise.all([
-    supabase.from("payments").select("status, amount"),
-    supabase.from("orders").select("order_status, created_at"),
-    supabase.from("customers").select("id"),
+    // Payments: last 90 days only (for revenue metrics).
+    supabase.from("payments").select("status, amount").gte("created_at", ninetyDaysIso),
+    // Orders: last 90 days only (for status counts).
+    supabase.from("orders").select("order_status, created_at").gte("created_at", ninetyDaysIso),
+    // Customers: count only, not all rows.
+    supabase.from("customers").select("id", { count: "exact", head: true }),
+    // Products + variants: small catalog, no limit needed.
     supabase.from("products").select("id, active, featured"),
     supabase
       .from("product_variants")
       .select("stock_quantity, low_stock_threshold, active"),
+    // Order items: scoped to last 90 days via join.
     supabase
       .from("order_items")
-      .select("product_name, quantity, subtotal, order:orders!inner(order_status, created_at)"),
+      .select("product_name, quantity, subtotal, order:orders!inner(order_status, created_at)")
+      .gte("order->>created_at", ninetyDaysIso),
     supabase
       .from("payments")
       .select("amount, status, created_at")
@@ -149,15 +159,16 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   }
 
   // ── Customer metrics ──
-  // count: "exact" counts rows, not distinct customers — fetch IDs and deduplicate.
+  // Total customers from the count query; unique customers from recent orders.
   const { data: orderCustomers } = await supabase
     .from("orders")
     .select("customer_id")
     .neq("order_status", "CANCELLED")
-    .not("customer_id", "is", null);
+    .not("customer_id", "is", null)
+    .gte("created_at", ninetyDaysIso);
   const uniqueCustomerIds = new Set(orderCustomers?.map((o) => o.customer_id));
   const customerMetrics: CustomerMetrics = {
-    totalCustomers: customersResult.data?.length ?? 0,
+    totalCustomers: customersResult.count ?? 0,
     customersWithOrders: uniqueCustomerIds.size,
   };
 

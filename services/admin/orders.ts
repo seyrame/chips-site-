@@ -46,23 +46,35 @@ interface OrderRecord {
 export async function listRecentOrders(limit = 100): Promise<AdminOrderListItem[]> {
   const supabase = await createClient();
 
-  const [{ data: orders, error: oErr }, { data: items, error: iErr }, { data: payments, error: pErr }] =
+  const { data: orders, error: oErr } = await supabase
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (oErr) throw oErr;
+
+  const orderIds = (orders ?? []).map((o) => o.id);
+
+  // Scope items and payments to only the fetched orders (not the entire table).
+  const [{ data: items, error: iErr }, { data: payments, error: pErr }] =
     await Promise.all([
-      supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(limit),
-      supabase
-        .from("order_items")
-        .select("order_id, quantity"),
-      supabase
-        .from("payments")
-        .select("order_id, status, created_at")
-        .order("created_at"),
+      orderIds.length > 0
+        ? supabase
+            .from("order_items")
+            .select("order_id, quantity")
+            .in("order_id", orderIds)
+        : Promise.resolve({ data: [], error: null }),
+      orderIds.length > 0
+        ? supabase
+            .from("payments")
+            .select("order_id, status, created_at")
+            .in("order_id", orderIds)
+            .order("created_at")
+        : Promise.resolve({ data: [], error: null }),
     ]);
 
-  if (oErr || iErr || pErr) throw (oErr ?? iErr ?? pErr);
+  if (iErr || pErr) throw (iErr ?? pErr);
 
   const itemCounts = new Map<string, number>();
   for (const item of items ?? []) {

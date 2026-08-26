@@ -12,7 +12,6 @@ import type {
   ProductImageRow,
   ProductRow,
   ProductVariantRow,
-  UserRole,
 } from "./database";
 
 export type {
@@ -68,9 +67,3 @@ export type { OrderRow as Order };
 export type { OrderItemRow as OrderItem };
 export type { PaymentRow as Payment };
 export type { CustomerRow as Customer };
-
-export interface AdminUser {
-  id: string;
-  email: string;
-  role: UserRole | null;
-}

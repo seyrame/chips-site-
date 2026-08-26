@@ -71,9 +71,12 @@ export interface PaymentStatusBreakdown {
 export async function getPaymentStatusBreakdown(): Promise<PaymentStatusBreakdown> {
   const supabase = await createClient();
 
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+
   const { data, error } = await supabase
     .from("payments")
-    .select("status, amount");
+    .select("status, amount")
+    .gte("created_at", ninetyDaysAgo);
 
   if (error) throw error;
 
