@@ -174,15 +174,17 @@ export async function verifyTransaction(
   if (!isRecord(raw)) return null;
 
   return {
-    status: typeof raw.status === "string" ? raw.status : "",
+    status: typeof raw.status === "string" ? raw.status : String(raw.status ?? ""),
     reference:
       typeof raw.reference === "string" ? raw.reference : reference,
-    amount: typeof raw.amount === "number" ? raw.amount : Number.NaN,
+    amount: typeof raw.amount === "number" ? raw.amount : Number(raw.amount),
     currency: typeof raw.currency === "string" ? raw.currency : "",
     channel: typeof raw.channel === "string" ? raw.channel : null,
     gateway_response:
       typeof raw.gateway_response === "string" ? raw.gateway_response : null,
-    paid_at: typeof raw.paid_at === "string" ? raw.paid_at : null,
+    paid_at: typeof raw.paid_at === "string" && raw.paid_at !== "null"
+      ? raw.paid_at
+      : null,
     metadata: isRecord(raw.metadata) ? raw.metadata : null,
   };
 }
@@ -214,8 +216,15 @@ export async function createRefund(
     merchant_note: merchantNote,
   });
 
+  if (typeof data.id !== "number" || data.id <= 0) {
+    throw new PaystackApiError(
+      "Refund response missing valid id — refund may not have been created",
+      0
+    );
+  }
+
   return {
-    id: typeof data.id === "number" ? data.id : 0,
+    id: data.id,
     status: typeof data.status === "string" ? data.status : "pending",
   };
 }
