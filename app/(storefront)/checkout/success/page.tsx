@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { ClearCartOnMount } from "@/components/cart/clear-cart-on-mount";
 import { buildOrderSupportLink } from "@/lib/config/site";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = {
   title: "Order received — TT Brothers",
@@ -19,10 +20,23 @@ export default async function CheckoutSuccessPage({
 }: PageProps<"/checkout/success">) {
   const params = await searchParams;
   const orderNumber = firstParam(params.order) ?? "your order";
-  // Don't trust the `paid` query param — anyone can append &paid=1 to
-  // the URL. Always show the safe "order received" state; the callback
-  // page's redirect carries the real confirmation.
-  const paid = false;
+
+  // Verify payment status from DB — never trust query params for state.
+  let paid = false;
+  if (orderNumber !== "your order") {
+    try {
+      const supabase = createAdminClient();
+      const { data } = await supabase
+        .from("orders")
+        .select("payment_status")
+        .eq("order_number", orderNumber)
+        .single();
+      paid = data?.payment_status === "PAID";
+    } catch {
+      // Order not found or DB error — show safe "order received" state.
+    }
+  }
+
   const supportLink = buildOrderSupportLink(orderNumber);
 
   return (

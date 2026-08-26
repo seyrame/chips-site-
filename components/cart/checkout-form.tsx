@@ -128,11 +128,11 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
                 type="tel"
                 name="phone"
                 required
-                pattern="0[0245789]\d{8}"
-                inputMode="numeric"
+                pattern="[0-9+\s\-]{8,21}"
+                inputMode="tel"
                 className={inputClass}
                 autoComplete="tel"
-                placeholder="0201234567"
+                placeholder="0201234567 or +233201234567"
               />
             </label>
           </div>

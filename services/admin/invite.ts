@@ -82,15 +82,15 @@ export async function createAdminInvite(
 
     if (error) throw error;
 
-    // Generate a password reset token so the invitee can set their password.
+    // Generate a password recovery token so the invitee can set their password.
     const { data: resetData, error: resetErr } =
       await supabase.auth.admin.generateLink({
-        type: "magiclink",
+        type: "recovery",
         email: normalizedEmail,
       });
 
     if (resetErr || !resetData?.properties?.hashed_token) {
-      log.error("magiclink.existing_user_failed", {
+      log.error("recovery.existing_user_failed", {
         email: normalizedEmail,
         error: resetErr?.message,
       });
@@ -133,15 +133,15 @@ export async function createAdminInvite(
     throw new Error("Failed to create admin profile.");
   }
 
-  // Generate a password reset token so the invitee can set their own password.
+  // Generate a password recovery token so the invitee can set their own password.
   const { data: resetData, error: resetErr } =
     await supabase.auth.admin.generateLink({
-      type: "magiclink",
+      type: "recovery",
       email: normalizedEmail,
     });
 
   if (resetErr || !resetData?.properties?.hashed_token) {
-    log.error("magiclink.new_user_failed", {
+      log.error("recovery.new_user_failed", {
       email: normalizedEmail,
       userId: newUser.user.id,
       error: resetErr?.message,
