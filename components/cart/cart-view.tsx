@@ -70,17 +70,17 @@ export function CartView() {
               </p>
 
               <div className="mt-auto flex items-center gap-4 pt-2">
-                <div className="flex h-9 items-center rounded-full border border-forest/20">
+                <div className="flex h-11 items-center rounded-full border border-forest/20">
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
                     aria-label={`Decrease quantity of ${item.productName} ${item.variantName}`}
                     disabled={item.quantity <= 1}
-                    className="h-full rounded-l-full px-3 text-charcoal hover:bg-cream-dark disabled:opacity-30"
+                    className="h-full min-h-11 min-w-11 rounded-l-full px-3 text-charcoal hover:bg-cream-dark disabled:opacity-30"
                   >
                     −
                   </button>
-                  <span className="w-6 text-center text-sm font-bold">
+                  <span className="w-7 text-center text-sm font-bold">
                     {item.quantity}
                   </span>
                   <button
@@ -93,7 +93,7 @@ export function CartView() {
                         ? `Only ${item.maxQuantity} in stock`
                         : undefined
                     }
-                    className="h-full rounded-r-full px-3 text-charcoal hover:bg-cream-dark disabled:opacity-30"
+                    className="h-full min-h-11 min-w-11 rounded-r-full px-3 text-charcoal hover:bg-cream-dark disabled:opacity-30"
                   >
                     +
                   </button>
@@ -102,7 +102,7 @@ export function CartView() {
                 <button
                   type="button"
                   onClick={() => removeItem(item.variantId)}
-                  className="text-xs font-semibold uppercase tracking-widest text-red-700 hover:underline"
+                  className="min-h-11 min-w-11 rounded-full text-xs font-semibold uppercase tracking-widest text-red-700 hover:underline"
                 >
                   Remove
                 </button>

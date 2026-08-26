@@ -56,17 +56,19 @@ export function SiteFooter({
         </div>
       </div>
 
-      <div className="border-t border-cream/10 py-5 text-center text-xs text-cream/40">
+      <div className="border-t border-cream/10 px-5 py-5 text-center text-xs text-cream/40">
         © {new Date().getFullYear()} {BRAND.name} · Made in Ghana
-        <span className="mx-2">·</span>
-        <span className="space-x-2">
+        <span className="mx-2 hidden sm:inline">·</span>
+        <br className="sm:hidden" />
+        <span className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
           <Link href="/privacy" className="hover:text-cream/70">Privacy</Link>
-          <span>·</span>
+          <span className="hidden sm:inline">·</span>
           <Link href="/terms" className="hover:text-cream/70">Terms</Link>
-          <span>·</span>
+          <span className="hidden sm:inline">·</span>
           <Link href="/returns" className="hover:text-cream/70">Returns</Link>
         </span>
-        <span className="mx-2">·</span>
+        <span className="mx-2 hidden sm:inline">·</span>
+        <br className="sm:hidden" />
         Built by Komla
       </div>
     </footer>

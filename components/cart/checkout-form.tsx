@@ -132,7 +132,7 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
                 inputMode="tel"
                 className={inputClass}
                 autoComplete="tel"
-                placeholder="0201234567 or +233201234567"
+                placeholder="+233 20 123 4567"
               />
             </label>
           </div>
@@ -177,7 +177,7 @@ export function CheckoutForm({ delivery }: { delivery: DeliveryConfig }) {
               <textarea
                 name="delivery_address"
                 required
-                rows={2}
+                rows={3}
                 maxLength={300}
                 className={`${inputClass} h-auto py-3`}
                 autoComplete="street-address"

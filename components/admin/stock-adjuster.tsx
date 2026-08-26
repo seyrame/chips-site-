@@ -43,13 +43,13 @@ export function StockAdjuster({
         required
         placeholder="+50 or −3"
         title="Positive to add stock, negative to deduct"
-        className="h-9 w-24 rounded-xl border border-forest/15 px-2.5 outline-none focus:border-forest"
+        className="h-9 w-20 min-w-[5rem] rounded-xl border border-forest/15 px-2.5 outline-none focus:border-forest sm:w-24"
       />
       <input
         name="note"
         maxLength={280}
         placeholder="Reason (e.g. delivery received)"
-        className="h-9 w-44 rounded-xl border border-forest/15 px-2.5 outline-none focus:border-forest"
+        className="h-9 min-w-0 flex-1 rounded-xl border border-forest/15 px-2.5 outline-none focus:border-forest sm:w-44 sm:flex-none"
       />
       <ApplyButton />
       {state.error ? (

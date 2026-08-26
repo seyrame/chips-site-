@@ -109,7 +109,7 @@ export default async function ProductPage({
                 </p>
               ) : null}
               {product.description ? (
-                <p className="mt-3 leading-relaxed whitespace-pre-line text-charcoal/70">
+                <p className="mt-3 leading-relaxed whitespace-pre-line break-words text-charcoal/70">
                   {product.description}
                 </p>
               ) : null}
@@ -119,7 +119,7 @@ export default async function ProductPage({
           {product.ingredients ? (
             <section className="mt-8 border-t border-toast/15 pt-8">
               <h2 className="font-display text-2xl text-forest">Ingredients</h2>
-              <p className="mt-3 leading-relaxed text-charcoal/70">
+              <p className="mt-3 leading-relaxed break-words text-charcoal/70">
                 {product.ingredients}
               </p>
             </section>

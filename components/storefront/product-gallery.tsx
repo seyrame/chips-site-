@@ -50,9 +50,9 @@ export function ProductGallery({
         />
       </div>
       {images.length > 1 ? (
-        <ul className="flex gap-2">
+        <ul className="flex gap-2 overflow-x-auto pb-1">
           {images.map((image, index) => (
-            <li key={image.id}>
+            <li key={image.id} className="shrink-0">
               <button
                 type="button"
                 onClick={() => setActiveIndex(index)}
