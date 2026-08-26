@@ -49,7 +49,8 @@ export async function requirePanelAccess(nextPath = "/admin"): Promise<AdminUser
   }
 
   // STAFF enters V1 read-only; manager-only pages re-check with
-  // requireManagerAccess() as write features land in Phase 8.
+  // requireManagerAccess() gates the write features (fulfilment,
+  // refunds, inventory).
   return admin;
 }
 

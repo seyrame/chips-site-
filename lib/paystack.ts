@@ -8,6 +8,7 @@ import { requireServerSecret } from "@/lib/env";
  * Only what the checkout pipeline needs:
  *  - initializeTransaction → hosted checkout URL for the customer
  *  - verifyTransaction     → authoritative status check on return
+ *  - createRefund          → full refund of a settled transaction
  *
  * The secret key is read lazily via requireServerSecret(), so builds
  * and CI never need real credentials. All amounts are integer
@@ -172,5 +173,38 @@ export async function verifyTransaction(
       typeof raw.gateway_response === "string" ? raw.gateway_response : null,
     paid_at: typeof raw.paid_at === "string" ? raw.paid_at : null,
     metadata: isRecord(raw.metadata) ? raw.metadata : null,
+  };
+}
+
+export interface RefundResult {
+  /** Paystack refund id. */
+  id: number;
+  /** pending | processing | processed | failed */
+  status: string;
+}
+
+/**
+ * Refund a transaction IN FULL (amount omitted → Paystack refunds
+ * whatever remains refundable, which also makes accidental double
+ * refunds fail loudly instead of over-refunding).
+ *
+ * Throws on transport/API failure — the caller must only persist the
+ * local REFUNDED state after this resolves successfully.
+ */
+export async function createRefund(
+  reference: string,
+  merchantNote?: string
+): Promise<RefundResult> {
+  const data = await paystackRequest<{
+    id?: unknown;
+    status?: unknown;
+  }>("POST", "/refund", {
+    transaction: reference,
+    merchant_note: merchantNote,
+  });
+
+  return {
+    id: typeof data.id === "number" ? data.id : 0,
+    status: typeof data.status === "string" ? data.status : "pending",
   };
 }

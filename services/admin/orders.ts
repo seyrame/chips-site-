@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import type { OrderItemRow, OrderRow, PaymentRow } from "@/types/database";
 
 /**
  * Admin order reads — cookie-scoped client under RLS (STAFF may read
@@ -98,4 +99,47 @@ export async function listRecentOrders(limit = 100): Promise<AdminOrderListItem[
       hasPendingIntent: pendingIntent,
     };
   });
+}
+
+export interface AdminOrderDetail {
+  order: OrderRow;
+  items: OrderItemRow[];
+  payments: PaymentRow[];
+}
+
+/**
+ * Full fulfilment view of a single order. Returns null when the id is
+ * not a valid uuid or the row doesn't exist (RLS hides nothing here —
+ * STAFF may read orders).
+ */
+export async function getOrderDetail(orderId: string): Promise<AdminOrderDetail | null> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) {
+    return null;
+  }
+
+  const supabase = await createClient();
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!order) return null;
+
+  const [{ data: items, error: iErr }, { data: payments, error: pErr }] = await Promise.all([
+    supabase.from("order_items").select("*").eq("order_id", orderId).order("product_name"),
+    supabase
+      .from("payments")
+      .select("*")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true }),
+  ]);
+  if (iErr || pErr) throw (iErr ?? pErr);
+
+  return {
+    order: order as OrderRow,
+    items: (items ?? []) as OrderItemRow[],
+    payments: (payments ?? []) as PaymentRow[],
+  };
 }

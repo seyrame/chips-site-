@@ -8,7 +8,8 @@ export default async function AdminDashboardPage({
       <header>
         <h1 className="font-display text-4xl text-forest">Dashboard</h1>
         <p className="mt-1 text-sm text-charcoal/70">
-          Catalog, inventory, checkout and Paystack payments are live.
+          Catalog, inventory, checkout, Paystack payments and order fulfilment
+          are live.
         </p>
       </header>
 
@@ -33,8 +34,13 @@ export default async function AdminDashboardPage({
             table, not the JWT.
           </li>
           <li>
-            Next up (Phase 8): fulfilment tooling — the order status
-            workflow, refunds and customer views.
+            Fulfilment lives in{" "}
+            <code className="rounded bg-cream px-1">/admin/orders</code>: advance
+            the status workflow, cancel with automatic restock, and issue full
+            Paystack refunds.
+          </li>
+          <li>
+            Next up: payments reconciliation detail and analytics.
           </li>
         </ul>
       </section>

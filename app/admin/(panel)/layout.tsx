@@ -15,9 +15,9 @@ const NAV_ITEMS = [
   { label: "Products", href: "/admin/products", enabled: true },
   { label: "Inventory", href: "/admin/inventory", enabled: true },
   { label: "Orders", href: "/admin/orders", enabled: true },
-  // Payments detail / Customers / Analytics arrive in later phases.
+  // Payments detail / Analytics / Settings arrive in later phases.
   { label: "Payments", href: "/admin/payments", enabled: false },
-  { label: "Customers", href: "/admin/customers", enabled: false },
+  { label: "Customers", href: "/admin/customers", enabled: true },
   { label: "Analytics", href: "/admin/analytics", enabled: false },
   { label: "Settings", href: "/admin/settings", enabled: false },
 ] as const;

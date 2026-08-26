@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 
 import { listRecentOrders } from "@/services/admin/orders";
@@ -60,7 +61,12 @@ export default async function AdminOrdersPage() {
               {orders.map((order) => (
                 <tr key={order.id} className="align-top hover:bg-cream/60">
                   <td className="px-5 py-4">
-                    <p className="font-bold text-forest">{order.orderNumber}</p>
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="font-bold text-forest underline-offset-2 hover:underline"
+                    >
+                      {order.orderNumber}
+                    </Link>
                     <p className="mt-0.5 text-xs text-charcoal/50">
                       {CREATED_AT_FORMAT.format(new Date(order.createdAt))}
                     </p>
